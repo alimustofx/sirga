@@ -1,13 +1,25 @@
 <script setup lang="ts">
+import AnimatedNumber from '@/components/viz/AnimatedNumber.vue';
 import { rupiah } from '@/lib/format';
 
-defineProps<{ value: string; period: string; net?: string; school?: string }>();
+defineProps<{ value: string; period: string; net?: string; school?: string; gross?: string }>();
 </script>
 
 <template>
-    <section class="rounded-xl bg-primary-900 p-5 text-white shadow-card sm:p-6">
-        <p class="text-sm font-medium text-white/70">Yang Diterimakan · {{ period }}</p>
-        <p class="num mt-1 text-3xl font-bold sm:text-4xl">{{ rupiah(value) }}</p>
-        <p v-if="net && school" class="mt-3 text-[13px] text-white/70">Penghasilan bersih {{ rupiah(net) }} − potongan sekolah {{ rupiah(school) }}</p>
+    <section class="bg-hero relative overflow-hidden rounded-3xl p-6 text-white shadow-hero sm:p-8">
+        <div class="dot-grid pointer-events-none absolute inset-0 opacity-60" aria-hidden="true" />
+        <div class="pointer-events-none absolute -top-16 -right-16 size-56 rounded-full border border-white/10" aria-hidden="true" />
+        <div class="pointer-events-none absolute -top-8 -right-8 size-40 rounded-full border border-white/10" aria-hidden="true" />
+        <div class="relative">
+            <span class="gold-rule mb-3 block" aria-hidden="true" />
+            <p class="text-[13px] font-medium tracking-wide text-white/70 uppercase">Yang Diterimakan · {{ period }}</p>
+            <p class="mt-2 text-[34px] leading-tight font-bold tracking-tight sm:text-5xl"><AnimatedNumber :value="value" :duration="1100" /></p>
+            <div v-if="net && school" class="mt-5 flex flex-wrap gap-2">
+                <span v-if="gross" class="num rounded-full bg-white/10 px-3 py-1 text-xs font-medium ring-1 ring-white/15">Kotor {{ rupiah(gross) }}</span>
+                <span class="num rounded-full bg-white/10 px-3 py-1 text-xs font-medium ring-1 ring-white/15">Bersih {{ rupiah(net) }}</span>
+                <span class="num rounded-full bg-gold-500/20 px-3 py-1 text-xs font-medium text-gold-100 ring-1 ring-gold-400/30">Potongan sekolah {{ rupiah(school) }}</span>
+            </div>
+            <div v-if="$slots.default" class="mt-6 flex flex-col gap-2 sm:flex-row"><slot /></div>
+        </div>
     </section>
 </template>

@@ -4,7 +4,9 @@ import AppBadge from '@/components/app/AppBadge.vue';
 import AppButton from '@/components/app/AppButton.vue';
 import AppCard from '@/components/app/AppCard.vue';
 import AppTable from '@/components/app/AppTable.vue';
+import PeriodTimeline from '@/components/admin/PeriodTimeline.vue';
 import PayrollStatusBadge from '@/components/payroll/PayrollStatusBadge.vue';
+import ProgressRing from '@/components/viz/ProgressRing.vue';
 import { confirmAction } from '@/composables/useConfirm';
 import { formatDate, rupiah } from '@/lib/format';
 import type { Period } from '@/types';
@@ -50,6 +52,8 @@ const bcols = [{ key: 'filename', label: 'File', primary: true }, { key: 'status
         </div>
     </div>
 
+    <AppCard class="mb-4"><PeriodTimeline :status="period.status" :published-at="period.published_at" :closed-at="period.closed_at" /></AppCard>
+
     <div class="grid grid-cols-2 gap-3 lg:grid-cols-5">
         <StatCard label="Kelengkapan" :value="`${readiness.stats.complete}/${readiness.stats.employees}`" hint="ASN aktif punya rincian" />
         <StatCard label="Gaji kotor" :value="rupiah(totals.gross)" />
@@ -60,7 +64,8 @@ const bcols = [{ key: 'filename', label: 'File', primary: true }, { key: 'status
 
     <div class="mt-4 grid gap-4 lg:grid-cols-3">
         <div class="space-y-4 lg:col-span-2">
-            <AppCard title="Pemeriksaan Sebelum Publikasi">
+            <AppCard title="Pemeriksaan Sebelum Publikasi" :accent="readiness.ready ? 'teal' : 'gold'">
+                <div class="mb-4 flex items-center gap-4"><ProgressRing :value="readiness.stats.employees ? (readiness.stats.complete / readiness.stats.employees) * 100 : 0" :size="72" :thickness="8" /><p class="text-sm text-neutral-600"><span class="num font-semibold text-neutral-950">{{ readiness.stats.complete }}</span> dari <span class="num font-semibold text-neutral-950">{{ readiness.stats.employees }}</span> ASN aktif sudah memiliki rincian.</p></div>
                 <div v-if="readiness.ready" class="flex items-start gap-3 rounded-lg bg-success-bg p-3 text-sm text-success-fg"><Check class="mt-0.5 size-5 shrink-0" /><p><strong>Siap dipublikasikan.</strong> Seluruh pemeriksaan kelengkapan terpenuhi.</p></div>
                 <ul v-else class="space-y-3">
                     <li v-for="i in readiness.issues" :key="i.key" class="rounded-lg border border-[#fcd34d] bg-warning-bg p-3 text-sm text-warning-fg">

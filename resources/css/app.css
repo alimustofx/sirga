@@ -35,8 +35,37 @@
     --color-info-bg: #dbeafe;
     --color-info-fg: #1e40af;
 
-    --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.05);
+    --color-gold-100: #f8efd6;
+    --color-gold-400: #d9b45a;
+    --color-gold-500: #c9a24b;
+    --color-gold-700: #8a6a1f;
+
+    --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.05);
+    --shadow-lift: 0 2px 4px rgba(15, 23, 42, 0.04), 0 10px 24px -6px rgba(15, 23, 42, 0.12);
     --shadow-modal: 0 12px 32px rgba(15, 23, 42, 0.12);
+    --shadow-hero: 0 18px 40px -12px rgba(20, 43, 69, 0.55);
+
+    --animate-fade-up: fade-up 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    --animate-pop: pop 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
+    --animate-shimmer: shimmer 1.6s linear infinite;
+    --animate-float: float 7s ease-in-out infinite;
+
+    @keyframes fade-up {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: none; }
+    }
+    @keyframes pop {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: none; }
+    }
+    @keyframes shimmer {
+        from { background-position: -200% 0; }
+        to { background-position: 200% 0; }
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
 }
 
 /* Variabel yang dibaca komponen shadcn bawaan starter kit (mis. toast) */
@@ -65,7 +94,11 @@
         -webkit-text-size-adjust: 100%;
     }
     body {
-        background: var(--color-neutral-50);
+        background:
+            radial-gradient(900px 380px at 88% -8%, rgba(40, 123, 140, 0.09), transparent 60%),
+            radial-gradient(700px 320px at -5% 0%, rgba(20, 43, 69, 0.05), transparent 60%),
+            var(--color-neutral-50);
+        background-attachment: fixed;
         color: var(--color-neutral-950);
         overflow-x: hidden;
     }
@@ -96,14 +129,95 @@
         font-variant-numeric: tabular-nums;
         white-space: nowrap;
     }
+    /* Hero navy dengan kedalaman */
+    .bg-hero {
+        background:
+            radial-gradient(520px 260px at 100% 0%, rgba(50, 150, 163, 0.35), transparent 60%),
+            radial-gradient(420px 240px at 0% 110%, rgba(201, 162, 75, 0.16), transparent 60%),
+            linear-gradient(135deg, #142b45 0%, #1c3a59 55%, #245477 100%);
+    }
+    .bg-sidebar {
+        background:
+            radial-gradient(300px 200px at 0% 0%, rgba(50, 150, 163, 0.22), transparent 70%),
+            linear-gradient(180deg, #142b45 0%, #10243b 100%);
+    }
+    .dot-grid {
+        background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+        background-size: 18px 18px;
+    }
+    .glass {
+        background: rgba(255, 255, 255, 0.72);
+        -webkit-backdrop-filter: saturate(160%) blur(14px);
+        backdrop-filter: saturate(160%) blur(14px);
+    }
+    .card-lift {
+        transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.25s, border-color 0.25s;
+    }
+    .card-lift:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lift);
+        border-color: var(--color-neutral-400);
+    }
+    .skeleton {
+        background: linear-gradient(90deg, var(--color-neutral-100) 25%, var(--color-neutral-200) 37%, var(--color-neutral-100) 63%);
+        background-size: 200% 100%;
+        animation: var(--animate-shimmer);
+    }
+    .gold-rule {
+        height: 3px;
+        width: 40px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--color-gold-400), var(--color-gold-500));
+    }
     .page-title {
         font-size: 1.5rem;
         line-height: 2rem;
         font-weight: 700;
+        letter-spacing: -0.02em;
         color: var(--color-primary-900);
     }
     @media (min-width: 1024px) {
-        .page-title {
+        /* Hero navy dengan kedalaman */
+    .bg-hero {
+        background:
+            radial-gradient(520px 260px at 100% 0%, rgba(50, 150, 163, 0.35), transparent 60%),
+            radial-gradient(420px 240px at 0% 110%, rgba(201, 162, 75, 0.16), transparent 60%),
+            linear-gradient(135deg, #142b45 0%, #1c3a59 55%, #245477 100%);
+    }
+    .bg-sidebar {
+        background:
+            radial-gradient(300px 200px at 0% 0%, rgba(50, 150, 163, 0.22), transparent 70%),
+            linear-gradient(180deg, #142b45 0%, #10243b 100%);
+    }
+    .dot-grid {
+        background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+        background-size: 18px 18px;
+    }
+    .glass {
+        background: rgba(255, 255, 255, 0.72);
+        -webkit-backdrop-filter: saturate(160%) blur(14px);
+        backdrop-filter: saturate(160%) blur(14px);
+    }
+    .card-lift {
+        transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.25s, border-color 0.25s;
+    }
+    .card-lift:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lift);
+        border-color: var(--color-neutral-400);
+    }
+    .skeleton {
+        background: linear-gradient(90deg, var(--color-neutral-100) 25%, var(--color-neutral-200) 37%, var(--color-neutral-100) 63%);
+        background-size: 200% 100%;
+        animation: var(--animate-shimmer);
+    }
+    .gold-rule {
+        height: 3px;
+        width: 40px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--color-gold-400), var(--color-gold-500));
+    }
+    .page-title {
             font-size: 1.75rem;
             line-height: 2.25rem;
         }

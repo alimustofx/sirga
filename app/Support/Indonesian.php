@@ -11,6 +11,13 @@ final class Indonesian
         return self::MONTHS[$m] ?? (string) $m;
     }
 
+    private const SHORT = [1 => 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+    public static function short(int $m): string
+    {
+        return self::SHORT[$m] ?? (string) $m;
+    }
+
     public static function months(): array
     {
         return self::MONTHS;

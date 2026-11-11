@@ -25,10 +25,10 @@ const active = (i: NavItem): boolean => {
                     <Link
                         :href="i.href"
                         :aria-current="active(i) ? 'page' : undefined"
-                        :class="['flex min-h-11 items-center gap-3 rounded-lg border-l-[3px] px-3 text-sm font-medium transition-colors', active(i) ? 'border-primary-500 bg-white/10 text-white' : 'border-transparent text-white/75 hover:bg-white/5 hover:text-white']"
+                        :class="['relative flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium transition-all duration-200', active(i) ? 'bg-white/12 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.07)] before:absolute before:top-2.5 before:bottom-2.5 before:left-0 before:w-[3px] before:rounded-full before:bg-gold-400' : 'text-white/70 hover:bg-white/6 hover:text-white']"
                         @click="$emit('navigate')"
                     >
-                        <component :is="i.icon" class="size-[18px] shrink-0" />
+                        <component :is="i.icon" :class="['size-[18px] shrink-0 transition-colors', active(i) ? 'text-gold-400' : '']" />
                         {{ i.label }}
                     </Link>
                 </li>

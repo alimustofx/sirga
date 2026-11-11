@@ -8,8 +8,10 @@ use App\Models\AuditLog;
 use App\Models\Employee;
 use App\Models\Payment;
 use App\Models\PayrollPeriod;
+use App\Models\PayrollRecord;
 use App\Services\Payroll\PayrollPeriodService;
 use App\Support\AuditLabels;
+use App\Support\Indonesian;
 use App\Support\Money;
 use App\Support\PayrollPresenter;
 use Illuminate\Http\Request;
@@ -27,7 +29,31 @@ class DashboardController extends Controller
             ->filter(fn ($l) => $request->user()->isSuperAdmin() || collect(AuditLabels::financePrefixes())->contains(fn ($p) => str_starts_with($l->action, $p)))
             ->take(8)->values();
 
+        $trend = PayrollPeriod::newestFirst()->limit(6)->get()->reverse()->values()->map(function ($p) {
+            $t = PayrollRecord::where('payroll_period_id', $p->id)
+                ->selectRaw('coalesce(sum(gross_salary),0) g, coalesce(sum(school_deductions_total),0) s, coalesce(sum(take_home_pay),0) t')->first();
+
+            return ['id' => $p->id, 'label' => Indonesian::short($p->period_month), 'full' => $p->label, 'gross' => Money::str($t->g), 'school' => Money::str($t->s), 'take_home' => Money::str($t->t)];
+        });
+
+        $collection = null;
+        if ($period && $period->status->isVisibleToTeacher()) {
+            $payable = PayrollRecord::where('payroll_period_id', $period->id)->where('school_deductions_total', '>', 0)->pluck('school_deductions_total');
+            $pays = Payment::whereHas('record', fn ($q) => $q->where('payroll_period_id', $period->id))->get();
+            $sum = fn (PaymentStatus $st) => Money::sum($pays->filter(fn ($x) => $x->status === $st)->pluck('total_amount'));
+            $total = Money::sum($payable);
+            $paid = $sum(PaymentStatus::Paid);
+            $pending = $sum(PaymentStatus::Pending);
+            $collection = [
+                'total' => Money::str($total), 'paid' => Money::str($paid), 'pending' => Money::str($pending),
+                'unpaid' => Money::str($total->minus($paid)->minus($pending)), 'count' => $payable->count(),
+                'count_paid' => $pays->where('status', PaymentStatus::Paid)->count(),
+            ];
+        }
+
         return Inertia::render('admin/Dashboard', [
+            'trend' => $trend,
+            'collection' => $collection,
             'cards' => [
                 'total' => (clone $active)->count(),
                 'pns' => (clone $active)->where('employment_status', 'PNS')->count(),

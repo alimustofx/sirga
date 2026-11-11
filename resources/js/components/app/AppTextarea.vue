@@ -14,7 +14,7 @@ defineProps<{ label?: string; error?: string | string[]; hint?: string; rows?: n
             :placeholder="placeholder"
             :maxlength="maxlength"
             :aria-invalid="invalid"
-            :class="['w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-neutral-950 placeholder:text-neutral-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20 focus:outline-none', invalid ? 'border-[#dc2626]' : 'border-neutral-200']"
+            :class="['w-full rounded-xl border bg-white px-3 py-2.5 text-sm text-neutral-950 placeholder:text-neutral-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20 focus:outline-none', invalid ? 'border-[#dc2626]' : 'border-neutral-200']"
         />
     </AppField>
 </template>
