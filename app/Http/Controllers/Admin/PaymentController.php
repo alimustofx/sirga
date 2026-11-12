@@ -13,6 +13,7 @@ use App\Services\PaymentService;
 use App\Support\Money;
 use App\Support\PayrollPresenter;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Inertia\Inertia;
 
 class PaymentController extends Controller
@@ -22,6 +23,7 @@ class PaymentController extends Controller
         $periods = PayrollPeriod::visibleToTeachers()->newestFirst()->get();
         $period = $periods->firstWhere('id', (int) $request->query('period')) ?? $periods->first();
         $items = collect();
+        $per = in_array((int) $request->query('per_page'), [10, 15, 25, 50], true) ? (int) $request->query('per_page') : 15;
 
         if ($period) {
             $q = PayrollRecord::where('payroll_period_id', $period->id)->where('school_deductions_total', '>', 0)->with(['employee', 'payment']);
@@ -39,10 +41,14 @@ class PaymentController extends Controller
             $items = $items->where('status', $f)->values();
         }
 
+        $pageNo = max(1, (int) $request->query('page', 1));
+        $paged = new LengthAwarePaginator($items->forPage($pageNo, $per)->values(), $items->count(), $per, $pageNo, ['path' => $request->url(), 'query' => $request->query()]);
+
         return Inertia::render('admin/Payments', [
+            'perPage' => $per,
             'periods' => $periods->map(fn ($p) => PayrollPresenter::period($p))->values(),
             'period' => $period ? PayrollPresenter::period($period) : null,
-            'items' => $items,
+            'items' => $paged,
             'counts' => $counts,
             'filters' => ['q' => $request->query('q', ''), 'status' => $request->query('status', '')],
         ]);

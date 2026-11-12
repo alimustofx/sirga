@@ -11,12 +11,14 @@ import AppTable from '@/components/app/AppTable.vue';
 import { confirmAction } from '@/composables/useConfirm';
 import { useFilters } from '@/composables/useFilters';
 import { formatNip, rupiah } from '@/lib/format';
-import type { Period } from '@/types';
+import AppPagination from '@/components/app/AppPagination.vue';
+import type { Paginated, Period } from '@/types';
 import { Head, router, useForm } from '@inertiajs/vue3';
+import { Search } from '@lucide/vue';
 import { ref } from 'vue';
 
 type Rec = { id: number; name: string; nip: string; status: string; gross: string; official: string; net: string; school: string; take_home: string; validation: string; validation_label: string };
-const props = defineProps<{ periods: Period[]; period: Period | null; records: Rec[]; missing: { id: number; full_name: string; nip: string }[]; filters: { q: string; status: string; validation: string }; counts: { copied: number } }>();
+const props = defineProps<{ periods: Period[]; period: Period | null; records: Paginated<Rec>; perPage: number; missing: { id: number; full_name: string; nip: string }[]; filters: { q: string; status: string; validation: string }; counts: { copied: number } }>();
 
 const f = useFilters('/admin/penghasilan', props.filters, () => ({ period: props.period?.id }));
 const open = ref(false);
@@ -57,11 +59,11 @@ async function verifyAll(): Promise<void> {
 
         <AppCard flush>
             <div class="grid gap-3 border-b border-neutral-200 p-4 sm:grid-cols-3">
-                <AppInput v-model="f.q" placeholder="Cari nama atau NIP…" inputmode="search" />
+                <AppInput v-model="f.q" placeholder="Cari nama atau NIP…" :icon="Search" inputmode="search" />
                 <AppSelect v-model="f.status" placeholder="Semua status ASN" :options="[{ value: 'PNS', label: 'PNS' }, { value: 'PPPK', label: 'PPPK' }]" />
                 <AppSelect v-model="f.validation" placeholder="Semua validasi" :options="[{ value: 'valid', label: 'Valid' }, { value: 'mismatch', label: 'Selisih sumber' }, { value: 'copied', label: 'Perlu verifikasi' }, { value: 'invalid', label: 'Tidak valid' }]" />
             </div>
-            <AppTable :columns="columns" :rows="records" empty-title="Belum ada rincian" empty-text="Impor file Excel atau input manual untuk menambah data.">
+            <AppTable :columns="columns" :rows="records.data" empty-title="Belum ada rincian" empty-text="Impor file Excel atau input manual untuk menambah data.">
                 <template #cell-name="{ row }"><span class="font-semibold text-primary-900">{{ row.name }}</span><span class="num block text-xs text-neutral-600">{{ formatNip(row.nip) }}</span></template>
                 <template #cell-gross="{ row }">{{ rupiah(row.gross) }}</template>
                 <template #cell-net="{ row }">{{ rupiah(row.net) }}</template>
@@ -70,6 +72,7 @@ async function verifyAll(): Promise<void> {
                 <template #cell-validation="{ row }"><AppBadge :tone="tone[row.validation as keyof typeof tone]">{{ row.validation_label }}</AppBadge></template>
                 <template #actions="{ row }"><AppButton size="sm" variant="ghost" :href="`/admin/penghasilan/${row.id}`">{{ period.status === 'closed' ? 'Lihat' : 'Ubah' }}</AppButton></template>
             </AppTable>
+            <AppPagination :page="records" :per-page="perPage" :per-page-options="[10, 15, 25, 50]" />
         </AppCard>
     </template>
 

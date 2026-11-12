@@ -28,8 +28,11 @@ class EmployeeController extends Controller
             $q->where('is_active', $request->query('active') === '1');
         }
 
+        $perPage = in_array((int) $request->query('per_page'), [10, 15, 25, 50], true) ? (int) $request->query('per_page') : 15;
+
         return Inertia::render('admin/Employees', [
-            'employees' => $q->orderBy('full_name')->paginate(15)->withQueryString()->through(fn (Employee $e) => [
+            'perPage' => $perPage,
+            'employees' => $q->orderBy('full_name')->paginate($perPage)->withQueryString()->through(fn (Employee $e) => [
                 'id' => $e->id, 'nip' => $e->nip, 'full_name' => $e->full_name, 'academic_title' => $e->academic_title,
                 'status' => $e->employment_status->value, 'rank' => $e->rank, 'position' => $e->position, 'unit' => $e->unit,
                 'account' => $e->bank_account_number, 'npwp' => $e->npwp, 'is_active' => $e->is_active,

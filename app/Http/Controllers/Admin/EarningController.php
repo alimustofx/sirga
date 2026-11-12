@@ -22,33 +22,37 @@ class EarningController extends Controller
     {
         $periods = PayrollPeriod::newestFirst()->get();
         $period = $periods->firstWhere('id', (int) $request->query('period')) ?? $periods->first();
-        $records = collect();
+        $perPage = in_array((int) $request->query('per_page'), [10, 15, 25, 50], true) ? (int) $request->query('per_page') : 15;
+        $records = new \Illuminate\Pagination\LengthAwarePaginator([], 0, $perPage);
         $missing = collect();
 
         if ($period) {
-            $q = PayrollRecord::where('payroll_period_id', $period->id)->with('employee');
+            $q = PayrollRecord::query()->select('payroll_records.*')
+                ->join('employees', 'employees.id', '=', 'payroll_records.employee_id')
+                ->where('payroll_records.payroll_period_id', $period->id)->with('employee');
             if ($s = trim((string) $request->query('q'))) {
-                $q->whereHas('employee', fn ($w) => $w->where('full_name', 'like', "%{$s}%")->orWhere('nip', 'like', '%'.preg_replace('/\s+/', '', $s).'%'));
+                $q->where(fn ($w) => $w->where('employees.full_name', 'like', "%{$s}%")->orWhere('employees.nip', 'like', '%'.preg_replace('/\s+/', '', $s).'%'));
             }
             if (in_array($request->query('status'), ['PNS', 'PPPK'], true)) {
-                $q->whereHas('employee', fn ($w) => $w->where('employment_status', $request->query('status')));
+                $q->where('employees.employment_status', $request->query('status'));
             }
             if ($v = $request->query('validation')) {
-                $q->where('validation_status', $v);
+                $q->where('payroll_records.validation_status', $v);
             }
-            $records = $q->get()->sortBy(fn ($r) => $r->employee->full_name)->values();
+            $records = $q->orderBy('employees.full_name')->paginate($perPage)->withQueryString()->through(fn ($r) => [
+                'id' => $r->id, 'name' => $r->employee->full_name, 'nip' => $r->employee->nip, 'status' => $r->employee->employment_status->value,
+                'gross' => Money::str($r->gross_salary), 'official' => Money::str($r->official_deductions_total), 'net' => Money::str($r->net_salary),
+                'school' => Money::str($r->school_deductions_total), 'take_home' => Money::str($r->take_home_pay),
+                'validation' => $r->validation_status->value, 'validation_label' => $r->validation_status->label(),
+            ]);
             $missing = Employee::active()->whereDoesntHave('payrollRecords', fn ($w) => $w->where('payroll_period_id', $period->id))->orderBy('full_name')->get(['id', 'full_name', 'nip']);
         }
 
         return Inertia::render('admin/Earnings', [
             'periods' => $periods->map(fn ($p) => PayrollPresenter::period($p))->values(),
             'period' => $period ? PayrollPresenter::period($period) : null,
-            'records' => $records->map(fn ($r) => [
-                'id' => $r->id, 'name' => $r->employee->full_name, 'nip' => $r->employee->nip, 'status' => $r->employee->employment_status->value,
-                'gross' => Money::str($r->gross_salary), 'official' => Money::str($r->official_deductions_total), 'net' => Money::str($r->net_salary),
-                'school' => Money::str($r->school_deductions_total), 'take_home' => Money::str($r->take_home_pay),
-                'validation' => $r->validation_status->value, 'validation_label' => $r->validation_status->label(),
-            ]),
+            'records' => $records,
+            'perPage' => $perPage,
             'missing' => $missing,
             'filters' => ['q' => $request->query('q', ''), 'status' => $request->query('status', ''), 'validation' => $request->query('validation', '')],
             'counts' => $period ? ['copied' => $period->records()->where('validation_status', ValidationStatus::Copied->value)->count()] : ['copied' => 0],

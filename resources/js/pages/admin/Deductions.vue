@@ -15,15 +15,17 @@ import AppTabs from '@/components/app/AppTabs.vue';
 import { confirmAction } from '@/composables/useConfirm';
 import { useFilters } from '@/composables/useFilters';
 import { rupiah } from '@/lib/format';
-import type { Period } from '@/types';
+import type { Paginated, Period } from '@/types';
 import { Head, router, useForm } from '@inertiajs/vue3';
+import { Copy, Plus, Search } from '@lucide/vue';
 import { ref } from 'vue';
 
 type Type = { id: number; name: string; description: string | null; default_amount: string; is_recurring: boolean; is_active: boolean; display_order: number };
 const props = defineProps<{
     types: Type[]; periods: Period[]; period: Period | null;
     configs: { id: number; name: string; description: string | null; default_amount: string; is_special: boolean; master_default: string | null }[];
-    rows: { id: number; name: string; nip: string; status: string; deductions: { id: number; config_id: number; name: string; amount: string }[]; total: string; take_home: string }[];
+    rows: Paginated<{ id: number; name: string; nip: string; status: string; deductions: { id: number; config_id: number; name: string; amount: string }[]; total: string; take_home: string }>;
+    perPage: number; configTotals: Record<string, string>;
     filters: { q: string; status: string }; needsReason: boolean; locked: boolean;
 }>();
 
@@ -60,13 +62,19 @@ const editable = () => !!props.period && !props.locked;
     <template v-if="tab === 'period'">
         <div v-if="!period" class="rounded-xl border border-neutral-200 bg-white p-6 text-sm text-neutral-600">Belum ada periode.</div>
         <template v-else>
-            <div class="mb-4 flex flex-wrap items-center gap-2">
+            <div class="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <PeriodFilter :periods="periods" :current="period.id" path="/admin/potongan" />
-                <template v-if="editable()"><AppButton variant="outline" @click="cfgOpen = true">Tambah potongan khusus</AppButton><AppButton v-if="['draft', 'review'].includes(period.status)" variant="outline" @click="copyPrev">Salin periode sebelumnya</AppButton></template>
-                <AppBadge v-if="locked" tone="neutral">Periode ditutup — hanya lihat</AppBadge>
+                <div v-if="editable()" class="flex flex-wrap gap-2">
+                    <AppButton variant="outline" @click="cfgOpen = true"><Plus class="size-4" />Potongan khusus</AppButton>
+                    <AppButton v-if="['draft', 'review'].includes(period.status)" variant="outline" @click="copyPrev"><Copy class="size-4" />Salin periode sebelumnya</AppButton>
+                </div>
+                <AppBadge v-else-if="locked" tone="neutral">Periode ditutup — hanya lihat</AppBadge>
             </div>
-            <div class="mb-3 grid gap-3 sm:grid-cols-2"><AppInput v-model="f.q" placeholder="Cari nama ASN…" inputmode="search" /><AppSelect v-model="f.status" placeholder="Semua status ASN" :options="[{ value: 'PNS', label: 'PNS' }, { value: 'PPPK', label: 'PPPK' }]" /></div>
-            <DeductionEditor :configs="configs" :rows="rows" :needs-reason="needsReason" :locked="locked" :period-id="period.id" :editable="editable()" />
+            <DeductionEditor :configs="configs" :rows="rows" :per-page="perPage" :config-totals="configTotals" :needs-reason="needsReason" :locked="locked" :editable="editable()">
+                <template #toolbar>
+                    <div class="grid gap-3 sm:grid-cols-[1fr_12rem]"><AppInput v-model="f.q" placeholder="Cari nama atau NIP ASN…" :icon="Search" inputmode="search" /><AppSelect v-model="f.status" placeholder="Semua status ASN" :options="[{ value: 'PNS', label: 'PNS' }, { value: 'PPPK', label: 'PPPK' }]" /></div>
+                </template>
+            </DeductionEditor>
         </template>
     </template>
 

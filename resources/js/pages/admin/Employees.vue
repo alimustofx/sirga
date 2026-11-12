@@ -21,7 +21,7 @@ type Emp = {
     id: number; nip: string; full_name: string; status: string; rank: string | null; position: string | null; unit: string | null; account: string | null;
     npwp: string | null; is_active: boolean; email: string | null; role: string | null; role_label: string | null; has_account: boolean; last_login_at: string | null;
 };
-const props = defineProps<{ employees: Paginated<Emp>; filters: { q: string; status: string; active: string }; canManage: boolean; roles: { name: string; label: string }[] }>();
+const props = defineProps<{ employees: Paginated<Emp>; perPage: number; filters: { q: string; status: string; active: string }; canManage: boolean; roles: { name: string; label: string }[] }>();
 
 const f = useFilters('/admin/asn', props.filters);
 const open = ref(false);
@@ -82,12 +82,15 @@ const statusOpts = [{ value: 'PNS', label: 'PNS' }, { value: 'PPPK', label: 'PPP
             <template #cell-last_login_at="{ row }">{{ row.last_login_at ? formatDate(row.last_login_at, true) : 'Belum pernah' }}</template>
             <template #cell-is_active="{ row }"><AppBadge :tone="row.is_active ? 'success' : 'neutral'">{{ row.is_active ? 'Aktif' : 'Nonaktif' }}</AppBadge></template>
             <template v-if="canManage" #actions="{ row }">
-                <AppDropdown :items="[{ label: 'Ubah data', action: () => edit(row) }, { label: 'Reset password', action: () => reset(row), hidden: !row.has_account }, { label: row.is_active ? 'Nonaktifkan' : 'Aktifkan', action: () => toggle(row), danger: row.is_active }, { label: 'Hapus', action: () => remove(row), danger: true }]">
-                    <template #trigger><button type="button" class="flex size-10 items-center justify-center rounded-lg hover:bg-neutral-100" aria-label="Aksi"><MoreHorizontal class="size-5" /></button></template>
-                </AppDropdown>
+                <div class="flex items-center justify-end gap-1">
+                    <AppButton size="sm" variant="outline" @click="edit(row)">Ubah</AppButton>
+                    <AppDropdown :items="[{ label: 'Reset password', action: () => reset(row), hidden: !row.has_account }, { label: row.is_active ? 'Nonaktifkan akun' : 'Aktifkan akun', action: () => toggle(row), danger: row.is_active }, { label: 'Hapus data ASN', action: () => remove(row), danger: true }]" label="Aksi lainnya">
+                        <template #trigger><button type="button" class="flex size-9 items-center justify-center rounded-lg text-neutral-600 hover:bg-neutral-100" aria-label="Aksi lainnya"><MoreHorizontal class="size-5" /></button></template>
+                    </AppDropdown>
+                </div>
             </template>
         </AppTable>
-        <AppPagination :page="employees" />
+        <AppPagination :page="employees" :per-page="perPage" :per-page-options="[10, 15, 25, 50]" />
     </AppCard>
 
     <AppDialog v-model:open="open" :title="editing ? 'Ubah Data ASN' : 'Tambah ASN'" :description="editing ? undefined : 'Password awal acak akan dibuat dan ditampilkan sekali.'" size="lg">

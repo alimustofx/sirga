@@ -17,9 +17,8 @@ defineProps<{ periods: Period[]; period: Period | null; payment: PaymentInfo | n
 
 <template>
     <Head title="Pembayaran Potongan" />
-    <div class="mb-5 flex animate-fade-up flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div class="mb-5 flex  flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-            <span class="gold-rule mb-2.5 block" aria-hidden="true" />
             <h1 class="page-title">Pembayaran Potongan</h1>
             <p v-if="period" class="mt-1.5 text-sm text-neutral-600">Potongan sekolah periode {{ period.label }}</p>
         </div>

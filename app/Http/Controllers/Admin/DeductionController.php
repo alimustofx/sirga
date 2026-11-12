@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\PayrollDeduction;
 use App\Models\PayrollPeriod;
 use App\Models\PayrollRecord;
 use App\Models\PeriodDeductionConfig;
@@ -12,6 +13,7 @@ use App\Support\Audit;
 use App\Support\Money;
 use App\Support\PayrollPresenter;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -24,17 +26,33 @@ class DeductionController extends Controller
         $periods = PayrollPeriod::newestFirst()->get();
         $period = $periods->firstWhere('id', (int) $request->query('period')) ?? $periods->first();
         $configs = $period ? $period->deductionConfigs()->with('type')->get() : collect();
-        $rows = collect();
+        $perPage = in_array((int) $request->query('per_page'), [10, 15, 25, 50], true) ? (int) $request->query('per_page') : 15;
+        $rows = new LengthAwarePaginator([], 0, $perPage);
+        $configTotals = [];
 
         if ($period) {
-            $q = PayrollRecord::where('payroll_period_id', $period->id)->with(['employee', 'deductions']);
+            $q = PayrollRecord::query()->select('payroll_records.*')
+                ->join('employees', 'employees.id', '=', 'payroll_records.employee_id')
+                ->where('payroll_records.payroll_period_id', $period->id)
+                ->with(['employee', 'deductions']);
             if ($s = trim((string) $request->query('q'))) {
-                $q->whereHas('employee', fn ($w) => $w->where('full_name', 'like', "%{$s}%")->orWhere('nip', 'like', '%'.preg_replace('/\s+/', '', $s).'%'));
+                $q->where(fn ($w) => $w->where('employees.full_name', 'like', "%{$s}%")->orWhere('employees.nip', 'like', '%'.preg_replace('/\s+/', '', $s).'%'));
             }
             if (in_array($request->query('status'), ['PNS', 'PPPK'], true)) {
-                $q->whereHas('employee', fn ($w) => $w->where('employment_status', $request->query('status')));
+                $q->where('employees.employment_status', $request->query('status'));
             }
-            $rows = $q->get()->sortBy(fn ($r) => $r->employee->full_name)->values();
+            $rows = $q->orderBy('employees.full_name')->paginate($perPage)->withQueryString()->through(fn ($r) => [
+                'id' => $r->id, 'name' => $r->employee->full_name, 'nip' => $r->employee->nip, 'status' => $r->employee->employment_status->value,
+                'deductions' => $r->deductions->map(fn ($d) => ['id' => $d->id, 'config_id' => $d->period_deduction_config_id, 'name' => $d->deduction_name_snapshot, 'amount' => Money::str($d->amount)])->values(),
+                'total' => Money::str($r->school_deductions_total), 'take_home' => Money::str($r->take_home_pay),
+            ]);
+
+            // total per jenis untuk seluruh periode (bukan hanya halaman ini)
+            $sums = PayrollDeduction::query()->selectRaw('period_deduction_config_id, sum(amount) as total')
+                ->whereIn('period_deduction_config_id', $configs->pluck('id'))->groupBy('period_deduction_config_id')->pluck('total', 'period_deduction_config_id');
+            foreach ($configs as $c) {
+                $configTotals[$c->id] = Money::str($sums[$c->id] ?? 0);
+            }
         }
 
         return Inertia::render('admin/Deductions', [
@@ -45,11 +63,9 @@ class DeductionController extends Controller
             'periods' => $periods->map(fn ($p) => PayrollPresenter::period($p))->values(),
             'period' => $period ? PayrollPresenter::period($period) : null,
             'configs' => $configs->map(fn ($c) => ['id' => $c->id, 'name' => $c->name, 'description' => $c->description, 'default_amount' => Money::str($c->default_amount), 'is_special' => $c->is_special, 'master_default' => $c->type ? Money::str($c->type->default_amount) : null]),
-            'rows' => $rows->map(fn ($r) => [
-                'id' => $r->id, 'name' => $r->employee->full_name, 'nip' => $r->employee->nip, 'status' => $r->employee->employment_status->value,
-                'deductions' => $r->deductions->map(fn ($d) => ['id' => $d->id, 'config_id' => $d->period_deduction_config_id, 'name' => $d->deduction_name_snapshot, 'amount' => Money::str($d->amount)])->values(),
-                'total' => Money::str($r->school_deductions_total), 'take_home' => Money::str($r->take_home_pay),
-            ]),
+            'rows' => $rows,
+            'perPage' => $perPage,
+            'configTotals' => $configTotals,
             'filters' => ['q' => $request->query('q', ''), 'status' => $request->query('status', '')],
             'needsReason' => $period?->status->value === 'published',
             'locked' => $period?->status->value === 'closed',

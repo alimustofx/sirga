@@ -27,9 +27,8 @@ const parts = computed(() => props.payroll ? [
 
 <template>
     <Head title="Rincian Gaji" />
-    <div class="mb-5 flex animate-fade-up flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div class="mb-5 flex  flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-            <span class="gold-rule mb-2.5 block" aria-hidden="true" />
             <h1 class="page-title">Rincian Gaji</h1>
             <p v-if="payroll" class="mt-1.5 flex items-center gap-2 text-sm text-neutral-600">Periode {{ payroll.period.label }} <PayrollStatusBadge v-if="payroll.period.status === 'closed'" :status="payroll.period.status" label="Ditutup" /></p>
         </div>
@@ -41,7 +40,7 @@ const parts = computed(() => props.payroll ? [
     <div v-else class="space-y-4">
         <TakeHomePayCard :value="payroll.take_home" :period="payroll.period.label" :gross="payroll.gross" :net="payroll.net" :school="payroll.school_total">
             <AppButton variant="gold" size="lg" external :href="`/saya/slip/${payroll.period.id}`"><Download class="size-4" />Unduh slip PDF</AppButton>
-            <AppButton v-if="payment?.has_payable" variant="outline" size="lg" :href="`/saya/pembayaran/${payroll.period.id}`"><Wallet class="size-4" />Pembayaran potongan</AppButton>
+            <AppButton v-if="payment?.has_payable" variant="onDark" size="lg" :href="`/saya/pembayaran/${payroll.period.id}`"><Wallet class="size-4" />Pembayaran potongan</AppButton>
         </TakeHomePayCard>
 
         <AppCard title="Komposisi gaji kotor" :subtitle="`Dari ${rupiah(payroll.gross)}`"><ComposeBar :parts="parts" /></AppCard>

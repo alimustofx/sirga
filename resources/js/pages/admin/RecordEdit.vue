@@ -3,6 +3,7 @@ import AppBadge from '@/components/app/AppBadge.vue';
 import AppButton from '@/components/app/AppButton.vue';
 import AppCard from '@/components/app/AppCard.vue';
 import AppDialog from '@/components/app/AppDialog.vue';
+import AppInput from '@/components/app/AppInput.vue';
 import AppMoneyInput from '@/components/app/AppMoneyInput.vue';
 import AppSelect from '@/components/app/AppSelect.vue';
 import AppTextarea from '@/components/app/AppTextarea.vue';
@@ -123,15 +124,19 @@ const needsCheck = computed(() => ['mismatch', 'copied'].includes(props.record.v
                 <p v-if="preview.take < 0 || preview.net < 0" class="mt-3 rounded-lg bg-danger-bg p-2.5 text-[13px] text-danger-fg">Hasil negatif tidak dapat disimpan.</p>
                 <p class="mt-3 text-xs text-neutral-600">Pratinjau di layar. Angka resmi dihitung ulang server saat disimpan.</p>
             </AppCard>
-            <AppCard v-if="!record.locked" title="Simpan Perubahan">
-                <AppTextarea v-model="reason" :label="record.needs_reason ? 'Alasan perubahan (wajib)' : 'Alasan perubahan (opsional)'" :rows="3" :required="record.needs_reason" :error="form.errors.reason" placeholder="Mis. koreksi tunjangan keluarga" />
-                <AppButton class="mt-3" block size="lg" :loading="form.processing" @click="save">Simpan rincian</AppButton>
-            </AppCard>
             <AppCard v-if="revisions.length" title="Riwayat Revisi" flush>
                 <ul class="divide-y divide-neutral-100 text-sm">
                     <li v-for="r in revisions" :key="r.version" class="px-4 py-2.5"><p class="font-medium">Versi {{ r.version }} <span class="font-normal text-neutral-600">(sebelum perubahan)</span></p><p class="text-xs text-neutral-600">{{ r.by ?? 'Sistem' }} · {{ formatDate(r.at, true) }}<template v-if="r.take_home"> · diterimakan {{ rupiah(r.take_home) }}</template></p><p v-if="r.reason" class="mt-0.5 text-[13px]">{{ r.reason }}</p></li>
                 </ul>
             </AppCard>
+        </div>
+    </div>
+
+    <div v-if="!record.locked" class="sticky bottom-0 z-20 -mx-4 mt-6 border-t border-neutral-200 bg-white px-4 py-3 sm:-mx-6 sm:px-6">
+        <div class="mx-auto flex max-w-[88rem] flex-col gap-3 md:flex-row md:items-end">
+            <div class="md:w-56"><p class="eyebrow">Diterimakan (pratinjau)</p><p :class="['num text-xl font-bold', preview.take < 0 ? 'text-danger-fg' : 'text-primary-900']">{{ rupiah(preview.take) }}</p></div>
+            <div class="flex-1"><AppInput v-model="reason" :label="record.needs_reason ? 'Alasan perubahan (wajib)' : 'Alasan perubahan (opsional)'" :required="record.needs_reason" :error="form.errors.reason" placeholder="Mis. koreksi tunjangan keluarga" /></div>
+            <div class="flex gap-2"><AppButton variant="outline" href="/admin/penghasilan">Batal</AppButton><AppButton :loading="form.processing" :disabled="preview.take < 0 || preview.net < 0" @click="save">Simpan rincian</AppButton></div>
         </div>
     </div>
 

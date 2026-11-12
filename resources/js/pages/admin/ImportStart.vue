@@ -31,8 +31,14 @@ const submit = () => form.post(`/admin/periode/${props.period.id}/impor`, { forc
     <AppPageHeader title="Impor Data Penghasilan" :subtitle="`Periode ${period.label} · data baru disimpan hanya setelah Anda mengonfirmasi hasil validasi.`" />
     <PayrollImportWizard :current="step" />
 
-    <AppCard v-if="!canImport"><p class="text-sm text-neutral-800">Impor hanya dapat dilakukan pada periode berstatus Draft atau Review.</p></AppCard>
-    <form v-else class="grid gap-4 lg:grid-cols-3" @submit.prevent="submit">
+    <AppCard v-if="form.processing" class="mb-4">
+        <div class="space-y-3" role="status" aria-label="Memproses file">
+            <p class="text-sm font-semibold text-primary-900">Membaca dan memvalidasi file…</p>
+            <div v-for="n in 5" :key="n" class="skeleton h-4 rounded" :style="{ width: `${100 - n * 11}%` }" />
+        </div>
+    </AppCard>
+    <AppCard v-else-if="!canImport"><p class="text-sm text-neutral-800">Impor hanya dapat dilakukan pada periode berstatus Draft atau Review.</p></AppCard>
+    <form v-if="!form.processing && canImport" class="grid gap-4 lg:grid-cols-3" @submit.prevent="submit">
         <div class="space-y-4 lg:col-span-2">
             <AppCard title="1. Pilih jenis ASN pada file">
                 <div class="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Jenis ASN">

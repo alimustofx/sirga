@@ -8,11 +8,12 @@ import AppTable from '@/components/app/AppTable.vue';
 import PaymentStatusBadge from '@/components/payment/PaymentStatusBadge.vue';
 import { useFilters } from '@/composables/useFilters';
 import { formatDate, formatNip, rupiah } from '@/lib/format';
-import type { PaymentStatus, Period } from '@/types';
+import AppPagination from '@/components/app/AppPagination.vue';
+import type { Paginated, PaymentStatus, Period } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
 
 type Item = { record_id: number; payment_id: number | null; name: string; nip: string; status: PaymentStatus; status_label: string; amount: string; submitted_at: string | null; verified_at: string | null };
-const props = defineProps<{ periods: Period[]; period: Period | null; items: Item[]; counts: Record<string, number>; filters: { q: string; status: string } }>();
+const props = defineProps<{ periods: Period[]; period: Period | null; items: Paginated<Item>; perPage: number; counts: Record<string, number>; filters: { q: string; status: string } }>();
 const f = useFilters('/admin/pembayaran', props.filters, () => ({ period: props.period?.id }));
 const tabs: { v: string; l: string }[] = [{ v: '', l: 'Semua' }, { v: 'menunggu_verifikasi', l: 'Menunggu' }, { v: 'belum_dibayar', l: 'Belum dibayar' }, { v: 'ditolak', l: 'Ditolak' }, { v: 'lunas', l: 'Lunas' }];
 const columns = [{ key: 'name', label: 'Nama', primary: true }, { key: 'amount', label: 'Potongan', align: 'right' as const }, { key: 'status', label: 'Status' }, { key: 'submitted_at', label: 'Diunggah' }];
@@ -29,12 +30,13 @@ const total = () => Object.values(props.counts).reduce((a, b) => a + b, 0);
             </div>
             <AppInput v-model="f.q" placeholder="Cari nama atau NIP…" inputmode="search" />
         </div>
-        <AppTable :columns="columns" :rows="items" row-key="record_id" empty-title="Tidak ada data pembayaran" empty-text="Pembayaran muncul setelah periode dipublikasikan dan ada potongan sekolah.">
+        <AppTable :columns="columns" :rows="items.data" row-key="record_id" empty-title="Tidak ada data pembayaran" empty-text="Pembayaran muncul setelah periode dipublikasikan dan ada potongan sekolah.">
             <template #cell-name="{ row }"><span class="font-semibold text-primary-900">{{ row.name }}</span><span class="num block text-xs text-neutral-600">{{ formatNip(row.nip) }}</span></template>
             <template #cell-amount="{ row }">{{ rupiah(row.amount) }}</template>
             <template #cell-status="{ row }"><PaymentStatusBadge :status="row.status" :label="row.status_label" /></template>
             <template #cell-submitted_at="{ row }">{{ formatDate(row.submitted_at, true) }}</template>
             <template #actions="{ row }"><AppButton v-if="row.payment_id" size="sm" :variant="row.status === 'menunggu_verifikasi' ? 'primary' : 'ghost'" @click="router.visit(`/admin/pembayaran/${row.payment_id}`)">{{ row.status === 'menunggu_verifikasi' ? 'Verifikasi' : 'Detail' }}</AppButton></template>
         </AppTable>
+        <AppPagination :page="items" :per-page="perPage" :per-page-options="[10, 15, 25, 50]" />
     </AppCard>
 </template>

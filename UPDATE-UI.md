@@ -1,64 +1,52 @@
-# SIRGA ASN — Update UI/UX v2
+# SIRGA ASN — Update UI/UX v3 ("Ledger")
 
-Paket ini **hanya berisi file yang berubah** (`resources/`, 3 file PHP dashboard, dan skrip `scripts/sirga-doctor.sh`).
+Paket ini **hanya berisi file yang berubah**: `resources/` (seluruh frontend), 7 file PHP controller/helper, dan skrip `scripts/`.
 Tidak menyentuh `.env`, `vendor/`, `node_modules/`, database, `routes/`, `config/`, atau `bootstrap/`.
 
-## Cara pasang di Mac (copy-paste, urut)
-
-> ⚠️ **Jangan** drag-and-drop folder lewat Finder dan memilih "Ganti/Replace". Finder akan **menghapus** isi folder
-> lama yang namanya sama (itulah penyebab `bootstrap/cache`, tabel `cache`, `flashToast.ts` hilang sebelumnya).
-> Gunakan `rsync` di bawah: ia hanya menimpa file yang ada di ZIP dan **tidak pernah menghapus** file lain.
+## Pasang di Mac — satu baris (disarankan)
 
 ```bash
-# 0) Masuk ke proyek + backup cepat (di Desktop)
-cd /Applications/MAMP/htdocs/sirga
-tar -czf ~/Desktop/sirga-backup-$(date +%Y%m%d-%H%M).tar.gz --exclude=node_modules --exclude=vendor --exclude=storage/logs .
-
-# 1) Ekstrak ZIP ke folder SEMENTARA (bukan ke proyek)
-rm -rf /tmp/sirga-ui && mkdir -p /tmp/sirga-ui
-unzip -oq ~/Downloads/sirga-ui-v2.zip -d /tmp/sirga-ui
-
-# 2) Gabungkan ke proyek (perhatikan garis miring di akhir kedua path)
-rsync -av /tmp/sirga-ui/sirga/ /Applications/MAMP/htdocs/sirga/
-
-# 3) Periksa kesehatan proyek; file starter yang hilang dipulihkan otomatis
-bash scripts/sirga-doctor.sh
-
-# 4) Build ulang frontend dan bersihkan cache
-npm run build
-php artisan optimize:clear
+unzip -p ~/Downloads/sirga-ui-v3.zip sirga/scripts/sirga-update.sh | bash -s -- ~/Downloads/sirga-ui-v3.zip /Applications/MAMP/htdocs/sirga
 ```
 
-Lalu buka `http://127.0.0.1:8000` (atau `npm run dev` + `php artisan serve` selama pengembangan) dan tekan **⌘ + Shift + R** untuk memuat ulang tanpa cache.
+Skrip ini: ① backup proyek ke Desktop → ② ekstrak ke folder sementara → ③ `rsync` (hanya menimpa, **tidak pernah menghapus**)
+→ ④ `sirga-doctor.sh` memeriksa/memulihkan file starter yang hilang → ⑤ `npm run build` + `php artisan optimize:clear`.
 
-### Kalau ingin kembali ke versi sebelumnya
+> ⚠️ Jangan drag-and-drop folder lewat Finder lalu "Ganti/Replace" — Finder **menghapus** isi folder lama yang namanya sama.
+
+## Atau manual (4 perintah)
+
 ```bash
 cd /Applications/MAMP/htdocs/sirga
-tar -xzf ~/Desktop/sirga-backup-XXXXXXXX-XXXX.tar.gz -C .     # ganti nama file sesuai backup Anda
-npm run build
+rm -rf /tmp/sirga-ui && mkdir -p /tmp/sirga-ui && unzip -oq ~/Downloads/sirga-ui-v3.zip -d /tmp/sirga-ui
+rsync -av /tmp/sirga-ui/sirga/ ./
+bash scripts/sirga-doctor.sh && npm run build && php artisan optimize:clear
 ```
 
-### Kalau ada masalah
-Jalankan `bash scripts/sirga-doctor.sh` — skrip ini mengecek 7 hal (file inti Laravel, migrasi cache/jobs, file
-frontend starter, folder tulis, berkas SIRGA, sisa starter, dependensi) dan memulihkan yang hilang tanpa menimpa apa pun.
-Skrip bisa dijalankan kapan saja, aman diulang.
+## Kembali ke versi sebelumnya
+```bash
+tar -xzf ~/Desktop/sirga-backup-XXXXXXXX-XXXXXX.tar.gz -C /Applications/MAMP/htdocs/sirga && npm run build
+```
 
-## Yang baru
+## Yang berubah di v3
 
-**Sistem desain**: gradient navy berlapis, aksen emas tipis, pola titik, kartu bertingkat, tipografi lebih rapat,
-animasi masuk halus (menghormati *reduced motion*), skeleton/transisi saat pindah halaman.
+**Arah desain baru — "Ledger"**: datar berbasis garis & tipografi. Dibuang: gradient/lingkaran/pola titik dekoratif, ring progress,
+kartu ikon, garis emas di tiap judul, bayangan tebal, emoji. Angka tabular jadi pusat perhatian; label kapital kecil ala buku besar.
 
-**Visualisasi data (tanpa library tambahan)**: grafik batang tren per periode, donut komposisi gaji, progress ring
-kelengkapan/penagihan, bar komposisi, sparkline, angka yang berhitung naik (count-up).
+**Sidebar bisa dilipat** — tombol di header (atau **⌘B / Ctrl+B**) mengubahnya jadi rail ikon (72px, tooltip nama menu).
+Grup menu (Penggajian, Data & Informasi, Sistem) juga bisa diciutkan; pilihan tersimpan di browser.
 
-**Guru**: hero "Yang Diterimakan" dengan animasi angka, komposisi gaji (donut), tren 6 periode, timeline status
-pembayaran, kartu rekening bergaya kartu bank, unggah bukti drag-and-drop, bottom-nav melayang di ponsel, ringkasan
-riwayat dengan grafik.
+**Potongan Sekolah** — "Jenis potongan periode ini" kini panel yang **bisa diciutkan** (default tertutup, ringkasan berupa chip nama+nominal).
+Tabel "Nominal per ASN": **kolom Nama & tombol Ubah menempel** saat digeser, header menempel saat di-scroll, **paginasi dari server**
+(10/15/25/50 per halaman), nominal Rp0 diredam. Total per jenis dihitung untuk seluruh periode.
+Paginasi juga dipakai di **Penghasilan, Pembayaran, Data ASN**.
 
-**Admin**: dashboard KPI + tren + penagihan potongan sekolah (donut/ring), timeline alur periode, kartu periode
-dengan progress ring, **command palette ⌘K / Ctrl+K** untuk lompat ke menu mana pun, sidebar baru dengan kartu
-pengguna, breadcrumb halaman aktif, tabel lebih rapi, empty state berilustrasi, tombol dengan varian emas.
+**Skeleton loading di mana-mana** — pindah halaman → kerangka halaman; ganti filter/halaman → baris tabel skeleton;
+proses baca Excel → skeleton. (Muncul setelah 150 ms agar tidak berkedip.)
 
-**Login**: panel brand dengan pratinjau slip melayang, ikon di input, peringatan Caps Lock.
+**Dashboard admin** — blok **"Perlu tindakan"** (dengan tombol langsung), strip 4 angka utama (ASN aktif, total diterimakan,
+potongan lunas, kelengkapan data), grafik dengan **sumbu & label nilai** + tombol **Grafik/Tabel** untuk angka persis,
+penagihan potongan, dan daftar menunggu verifikasi.
 
-**Aksesibilitas**: tautan "Lewati ke konten", `aria-current`, label grafik, fokus terlihat, target sentuh ≥ 44px.
+**Lebih mudah dipakai** — tombol **Ubah** selalu terlihat di Data ASN (aksi lain di menu "⋯"); halaman edit rincian punya
+**bar Simpan yang menempel di bawah** (pratinjau diterimakan + alasan + Simpan); login tanpa dekorasi; menu aktif jelas.

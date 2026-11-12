@@ -6,20 +6,18 @@ defineProps<{ value: string; period: string; net?: string; school?: string; gros
 </script>
 
 <template>
-    <section class="bg-hero relative overflow-hidden rounded-3xl p-6 text-white shadow-hero sm:p-8">
-        <div class="dot-grid pointer-events-none absolute inset-0 opacity-60" aria-hidden="true" />
-        <div class="pointer-events-none absolute -top-16 -right-16 size-56 rounded-full border border-white/10" aria-hidden="true" />
-        <div class="pointer-events-none absolute -top-8 -right-8 size-40 rounded-full border border-white/10" aria-hidden="true" />
-        <div class="relative">
-            <span class="gold-rule mb-3 block" aria-hidden="true" />
-            <p class="text-[13px] font-medium tracking-wide text-white/70 uppercase">Yang Diterimakan · {{ period }}</p>
-            <p class="mt-2 text-[34px] leading-tight font-bold tracking-tight sm:text-5xl"><AnimatedNumber :value="value" :duration="1100" /></p>
-            <div v-if="net && school" class="mt-5 flex flex-wrap gap-2">
-                <span v-if="gross" class="num rounded-full bg-white/10 px-3 py-1 text-xs font-medium ring-1 ring-white/15">Kotor {{ rupiah(gross) }}</span>
-                <span class="num rounded-full bg-white/10 px-3 py-1 text-xs font-medium ring-1 ring-white/15">Bersih {{ rupiah(net) }}</span>
-                <span class="num rounded-full bg-gold-500/20 px-3 py-1 text-xs font-medium text-gold-100 ring-1 ring-gold-400/30">Potongan sekolah {{ rupiah(school) }}</span>
+    <section class="overflow-hidden rounded-xl bg-hero text-white">
+        <div class="grid gap-6 p-5 sm:p-7 lg:grid-cols-[1fr_auto] lg:items-end">
+            <div>
+                <p class="eyebrow !text-white/60">Yang diterimakan · {{ period }}</p>
+                <p class="mt-2 text-[34px] leading-tight font-bold tracking-tight sm:text-[44px]"><AnimatedNumber :value="value" :duration="700" /></p>
             </div>
-            <div v-if="$slots.default" class="mt-6 flex flex-col gap-2 sm:flex-row"><slot /></div>
+            <dl v-if="net && school" class="grid grid-cols-3 divide-x divide-white/15 text-left">
+                <div v-if="gross" class="pr-4 sm:pr-6"><dt class="eyebrow !text-white/60">Gaji kotor</dt><dd class="num mt-1 text-[13px] font-semibold sm:text-sm">{{ rupiah(gross) }}</dd></div>
+                <div class="px-4 sm:px-6"><dt class="eyebrow !text-white/60">Bersih</dt><dd class="num mt-1 text-[13px] font-semibold sm:text-sm">{{ rupiah(net) }}</dd></div>
+                <div class="pl-4 sm:pl-6"><dt class="eyebrow !text-white/60">Pot. sekolah</dt><dd class="num mt-1 text-[13px] font-semibold text-gold-400 sm:text-sm">{{ rupiah(school) }}</dd></div>
+            </dl>
         </div>
+        <div v-if="$slots.default" class="flex flex-col gap-2 border-t border-white/10 px-5 py-4 sm:flex-row sm:px-7"><slot /></div>
     </section>
 </template>

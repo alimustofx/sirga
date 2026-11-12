@@ -70,3 +70,14 @@ export function greeting(): string {
 
     return 'Selamat malam';
 }
+
+/** Singkatan HANYA untuk label sumbu grafik: Rp850 rb, Rp1,2 jt, Rp2,4 M. Angka lain selalu penuh. */
+export function rupiahCompact(value: string | number | null | undefined): string {
+    const n = Math.abs(Number(value ?? 0));
+    const fmt = (x: number) => x.toFixed(1).replace(/\.0$/, '').replace('.', ',');
+    if (n >= 1e9) return `Rp${fmt(n / 1e9)} M`;
+    if (n >= 1e6) return `Rp${fmt(n / 1e6)} jt`;
+    if (n >= 1e3) return `Rp${Math.round(n / 1e3)} rb`;
+
+    return `Rp${Math.round(n)}`;
+}

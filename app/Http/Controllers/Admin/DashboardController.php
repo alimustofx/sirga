@@ -33,7 +33,7 @@ class DashboardController extends Controller
             $t = PayrollRecord::where('payroll_period_id', $p->id)
                 ->selectRaw('coalesce(sum(gross_salary),0) g, coalesce(sum(school_deductions_total),0) s, coalesce(sum(take_home_pay),0) t')->first();
 
-            return ['id' => $p->id, 'label' => Indonesian::short($p->period_month), 'full' => $p->label, 'gross' => Money::str($t->g), 'school' => Money::str($t->s), 'take_home' => Money::str($t->t)];
+            return ['id' => $p->id, 'label' => Indonesian::short($p->period_month), 'full' => $p->label, 'status' => $p->status->value, 'status_label' => $p->status->label(), 'gross' => Money::str($t->g), 'school' => Money::str($t->s), 'take_home' => Money::str($t->t)];
         });
 
         $collection = null;
@@ -51,7 +51,32 @@ class DashboardController extends Controller
             ];
         }
 
+        $tasks = [];
+        if ($period && $readiness && $period->status->isPreparing()) {
+            $map = [
+                'missing_records' => ['/admin/penghasilan?period='.$period->id, 'Lengkapi'],
+                'validation_mismatch' => ['/admin/penghasilan?period='.$period->id.'&validation=mismatch', 'Periksa'],
+                'validation_copied' => ['/admin/penghasilan?period='.$period->id.'&validation=copied', 'Verifikasi'],
+                'validation_invalid' => ['/admin/penghasilan?period='.$period->id.'&validation=invalid', 'Perbaiki'],
+                'deductions_incomplete' => ['/admin/potongan?period='.$period->id, 'Atur potongan'],
+                'pending_import' => ['/admin/periode/'.$period->id, 'Buka periode'],
+                'payment_account' => ['/admin/pengaturan', 'Isi rekening'],
+            ];
+            foreach ($readiness['issues'] as $i) {
+                [$href, $action] = $map[$i['key']] ?? ['/admin/periode/'.$period->id, 'Buka'];
+                $tasks[] = ['key' => $i['key'], 'tone' => 'warning', 'title' => $i['message'], 'href' => $href, 'action' => $action];
+            }
+            if ($readiness['ready'] && $period->status === \App\Enums\PeriodStatus::Review) {
+                $tasks[] = ['key' => 'ready', 'tone' => 'success', 'title' => "Periode {$period->label} siap dipublikasikan.", 'href' => '/admin/periode/'.$period->id, 'action' => 'Publikasikan'];
+            }
+        }
+        $pendingCount = Payment::where('status', PaymentStatus::Pending->value)->count();
+        if ($pendingCount > 0) {
+            $tasks[] = ['key' => 'pending_payments', 'tone' => 'info', 'title' => "{$pendingCount} bukti transfer menunggu verifikasi.", 'href' => '/admin/pembayaran?status=menunggu_verifikasi', 'action' => 'Verifikasi'];
+        }
+
         return Inertia::render('admin/Dashboard', [
+            'tasks' => $tasks,
             'trend' => $trend,
             'collection' => $collection,
             'cards' => [
