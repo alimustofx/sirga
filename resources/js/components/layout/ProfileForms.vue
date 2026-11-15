@@ -14,7 +14,7 @@ const savePassword = () => pwd.put('/profil/password', { preserveScroll: true, o
 </script>
 
 <template>
-    <div class="grid gap-4 lg:grid-cols-2">
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <AppCard title="Identitas">
             <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
                 <dt class="text-neutral-600">Nama</dt><dd class="font-semibold">{{ profile.name }}</dd>

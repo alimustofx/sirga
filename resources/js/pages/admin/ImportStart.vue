@@ -38,10 +38,10 @@ const submit = () => form.post(`/admin/periode/${props.period.id}/impor`, { forc
         </div>
     </AppCard>
     <AppCard v-else-if="!canImport"><p class="text-sm text-neutral-800">Impor hanya dapat dilakukan pada periode berstatus Draft atau Review.</p></AppCard>
-    <form v-if="!form.processing && canImport" class="grid gap-4 lg:grid-cols-3" @submit.prevent="submit">
+    <form v-if="!form.processing && canImport" class="grid grid-cols-1 gap-4 lg:grid-cols-3" @submit.prevent="submit">
         <div class="space-y-4 lg:col-span-2">
             <AppCard title="1. Pilih jenis ASN pada file">
-                <div class="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Jenis ASN">
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Jenis ASN">
                     <label v-for="s in ['PNS', 'PPPK']" :key="s" :class="['flex min-h-16 cursor-pointer items-center gap-3 rounded-xl border-2 p-4 transition-colors', form.employment_status === s ? 'border-primary-600 bg-[#e6f2f4]' : 'border-neutral-200 hover:bg-neutral-50']">
                         <input v-model="form.employment_status" type="radio" :value="s" class="size-5 accent-primary-700" />
                         <span><span class="block text-base font-bold text-primary-900">{{ s }}</span><span class="text-[13px] text-neutral-600">File gaji {{ s }}</span></span>

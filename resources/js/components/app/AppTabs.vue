@@ -4,7 +4,7 @@ defineProps<{ tabs: { value: string; label: string; count?: number }[] }>();
 </script>
 
 <template>
-    <div class="-mx-1 flex gap-1 overflow-x-auto border-b border-neutral-200 px-1" role="tablist">
+    <div class="thin-scroll flex gap-1 overflow-x-auto border-b border-neutral-200" role="tablist">
         <button v-for="t in tabs" :key="t.value" type="button" role="tab" :aria-selected="model === t.value"
             :class="['relative flex min-h-11 shrink-0 items-center gap-2 px-4 text-sm font-semibold transition-colors', model === t.value ? 'text-primary-900 after:absolute after:inset-x-3 after:bottom-[-1px] after:h-0.5 after:rounded-full after:bg-primary-600' : 'text-neutral-600 hover:text-neutral-950']"
             @click="model = t.value">

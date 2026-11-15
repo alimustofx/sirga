@@ -6,10 +6,12 @@ import AppSelect from '@/components/app/AppSelect.vue';
 import AppTable from '@/components/app/AppTable.vue';
 import PaymentStatusBadge from '@/components/payment/PaymentStatusBadge.vue';
 import TrendBars from '@/components/viz/TrendBars.vue';
+import AppPagination from '@/components/app/AppPagination.vue';
+import { usePaged } from '@/composables/usePaged';
 import { monthName, rupiah } from '@/lib/format';
 import type { PaymentStatus, Period } from '@/types';
 import { Head } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 type Item = { period: Period; gross: string; net: string; school_total: string; take_home: string; payment_status: PaymentStatus; payment_label: string; has_payable: boolean };
 const props = defineProps<{ items: Item[] }>();
@@ -17,7 +19,9 @@ const props = defineProps<{ items: Item[] }>();
 const year = ref('');
 const years = computed(() => [...new Set(props.items.map((i) => i.period.year))].map((y) => ({ value: String(y), label: String(y) })));
 const filtered = computed(() => props.items.filter((i) => !year.value || String(i.period.year) === year.value));
-const rows = computed(() => filtered.value.map((i) => ({ ...i, id: i.period.id, label: i.period.label })));
+const allRows = computed(() => filtered.value.map((i) => ({ ...i, id: i.period.id, label: i.period.label })));
+const { page, perPage, items: rows, meta, reset } = usePaged(() => allRows.value, 8);
+watch(year, reset);
 const bars = computed(() => [...filtered.value].reverse().slice(-12).map((i) => ({ label: monthName(i.period.month).slice(0, 3), value: Number(i.take_home), full: i.period.label })));
 const total = computed(() => filtered.value.reduce((a, i) => a + Number(i.take_home), 0));
 const avg = computed(() => (filtered.value.length ? total.value / filtered.value.length : 0));
@@ -36,7 +40,7 @@ const columns = [
         <AppSelect v-if="years.length > 1" v-model="year" :options="years" placeholder="Semua tahun" class="w-44" />
     </AppPageHeader>
 
-    <div v-if="filtered.length" class="mb-4 grid gap-4 lg:grid-cols-3">
+    <div v-if="filtered.length" class="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <AppCard title="Ringkasan" class="lg:col-span-1" accent="gold">
             <p class="text-[13px] text-neutral-600">Total diterimakan{{ year ? ` ${year}` : '' }}</p>
             <p class="num text-2xl font-bold tracking-tight text-primary-900">{{ rupiah(total) }}</p>
@@ -55,5 +59,6 @@ const columns = [
             <template #cell-payment="{ row }"><PaymentStatusBadge v-if="row.has_payable" :status="row.payment_status" :label="row.payment_label" /><span v-else class="text-neutral-400">—</span></template>
             <template #actions="{ row }"><AppButton size="sm" variant="ghost" :href="`/saya/rincian/${row.period.id}`">Rincian</AppButton></template>
         </AppTable>
+        <AppPagination local :page="meta" :per-page="perPage" :per-page-options="[8, 16, 32]" @update:page="page = $event" @update:per-page="perPage = $event" />
     </AppCard>
 </template>

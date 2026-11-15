@@ -7,10 +7,10 @@ const tone = { default: 'text-primary-900', warning: 'text-warning-fg', danger: 
 </script>
 
 <template>
-    <div :class="['grid divide-neutral-200 overflow-hidden rounded-xl border border-neutral-200 bg-white max-lg:divide-y lg:divide-x', items.length === 3 ? 'lg:grid-cols-3' : items.length === 5 ? 'lg:grid-cols-5' : 'lg:grid-cols-4', 'grid-cols-1 sm:grid-cols-2']">
-        <component :is="it.to ? Link : 'div'" v-for="it in items" :key="it.label" :href="it.to" :class="['block px-5 py-4', it.to ? 'transition-colors hover:bg-neutral-50' : '']">
+    <div :class="['grid divide-neutral-200 overflow-hidden rounded-xl border border-neutral-200 bg-white divide-y xl:divide-y-0 xl:divide-x', items.length === 3 ? 'xl:grid-cols-3' : items.length === 5 ? 'xl:grid-cols-5' : 'xl:grid-cols-4', 'grid-cols-1 sm:grid-cols-2']">
+        <component :is="it.to ? Link : 'div'" v-for="it in items" :key="it.label" :href="it.to" :class="['block min-w-0 px-4 py-4 sm:px-5', it.to ? 'transition-colors hover:bg-neutral-50' : '']">
             <p class="eyebrow">{{ it.label }}</p>
-            <p :class="['num mt-1.5 text-2xl leading-8 font-bold tracking-tight', tone[it.tone ?? 'default']]">{{ it.value }}</p>
+            <p :class="['mt-1.5 [font-variant-numeric:tabular-nums] text-xl leading-8 font-bold tracking-tight sm:text-[22px] 2xl:text-2xl', tone[it.tone ?? 'default']]">{{ it.value }}</p>
             <p v-if="it.hint" class="mt-0.5 text-[13px] text-neutral-600">{{ it.hint }}</p>
         </component>
     </div>

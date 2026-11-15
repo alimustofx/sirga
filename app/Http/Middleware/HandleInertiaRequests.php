@@ -39,6 +39,7 @@ class HandleInertiaRequests extends Middleware
                 'name' => $s->school_name,
                 'address' => $s->school_address,
                 'has_logo' => filled($s->school_logo),
+                'logo_v' => $s->school_logo ? substr(md5($s->school_logo), 0, 8) : null,
             ] : null,
             'notifications' => fn () => $user ? [
                 'unread' => $user->notifications()->whereNull('read_at')->count(),

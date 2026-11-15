@@ -87,8 +87,8 @@ const needsCheck = computed(() => ['mismatch', 'copied'].includes(props.record.v
     <div v-if="record.locked" class="mb-4 rounded-xl border border-neutral-200 bg-neutral-100 p-4 text-sm">Periode sudah ditutup. Data terkunci dan hanya dapat dilihat.</div>
     <div v-if="errors.length" class="mb-4 rounded-xl border border-[#fca5a5] bg-danger-bg p-4 text-sm text-danger-fg" role="alert"><p v-for="e in errors" :key="e">{{ e }}</p></div>
 
-    <div class="grid gap-4 lg:grid-cols-3">
-        <div class="space-y-4 lg:col-span-2">
+    <div class="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <div class="min-w-0 space-y-4">
             <template v-for="grp in [{ t: 'earning', title: 'Penghasilan' }, { t: 'official_deduction', title: 'Potongan Resmi' }] as const" :key="grp.t">
                 <AppCard :title="grp.title">
                     <div class="space-y-2.5">
@@ -132,8 +132,8 @@ const needsCheck = computed(() => ['mismatch', 'copied'].includes(props.record.v
         </div>
     </div>
 
-    <div v-if="!record.locked" class="sticky bottom-0 z-20 -mx-4 mt-6 border-t border-neutral-200 bg-white px-4 py-3 sm:-mx-6 sm:px-6">
-        <div class="mx-auto flex max-w-[88rem] flex-col gap-3 md:flex-row md:items-end">
+    <div v-if="!record.locked" class="sticky bottom-3 z-20 mt-6 rounded-xl border border-neutral-200 bg-white p-4 shadow-lift">
+        <div class="flex flex-col gap-3 md:flex-row md:items-end">
             <div class="md:w-56"><p class="eyebrow">Diterimakan (pratinjau)</p><p :class="['num text-xl font-bold', preview.take < 0 ? 'text-danger-fg' : 'text-primary-900']">{{ rupiah(preview.take) }}</p></div>
             <div class="flex-1"><AppInput v-model="reason" :label="record.needs_reason ? 'Alasan perubahan (wajib)' : 'Alasan perubahan (opsional)'" :required="record.needs_reason" :error="form.errors.reason" placeholder="Mis. koreksi tunjangan keluarga" /></div>
             <div class="flex gap-2"><AppButton variant="outline" href="/admin/penghasilan">Batal</AppButton><AppButton :loading="form.processing" :disabled="preview.take < 0 || preview.net < 0" @click="save">Simpan rincian</AppButton></div>

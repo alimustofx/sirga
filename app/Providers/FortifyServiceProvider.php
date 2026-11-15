@@ -30,7 +30,10 @@ class FortifyServiceProvider extends ServiceProvider
             $nip = UserAccountService::normalizeNip((string) $request->input('nip'));
             $user = User::where('nip', $nip)->first();
 
-            if (! $user || ! Hash::check((string) $request->input('password'), $user->password)) {
+            // Selalu jalankan satu pemeriksaan hash (termasuk bila NIP tidak ada) agar waktu respons seragam.
+            $hash = $user?->password ?? '$2y$12$T0O1V49LuyH1oDiZ3K4F7u8RHQhcL4X/wEWrxoj/kmIijPeLFPWgq';
+            $valid = Hash::check((string) $request->input('password'), $hash);
+            if (! $user || ! $valid) {
                 return null;
             }
             if (! $user->is_active) {

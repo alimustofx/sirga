@@ -2,13 +2,13 @@
 # SIRGA Update — pasang paket update dengan AMAN (backup → rsync tanpa menghapus → doctor → build).
 #
 # Pakai (satu baris, dari mana saja):
-#   unzip -p ~/Downloads/sirga-ui-v3.zip sirga/scripts/sirga-update.sh | bash -s -- ~/Downloads/sirga-ui-v3.zip /Applications/MAMP/htdocs/sirga
+#   unzip -p ~/Downloads/sirga-ui-v4.zip sirga/scripts/sirga-update.sh | bash -s -- ~/Downloads/sirga-ui-v4.zip /Applications/MAMP/htdocs/sirga
 #
 # Argumen:  $1 = path ZIP update   $2 = path proyek (default: folder saat ini)
 # Opsi env: SKIP_BUILD=1 (lewati npm run build)
 set -euo pipefail
 
-ZIP="${1:-$HOME/Downloads/sirga-ui-v3.zip}"
+ZIP="${1:-$HOME/Downloads/sirga-ui-v4.zip}"
 PROJECT="${2:-$(pwd)}"
 
 [ -f "$ZIP" ] || { echo "❌ ZIP tidak ditemukan: $ZIP"; exit 1; }

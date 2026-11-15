@@ -28,9 +28,9 @@ const unread = computed(() => page.props.notifications?.unread ?? 0);
     <div class="min-h-dvh">
         <a href="#konten" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-primary-900 focus:px-3 focus:py-2 focus:text-white">Lewati ke konten</a>
         <header class="sticky top-0 z-30 border-b border-neutral-200 bg-white pt-[env(safe-area-inset-top)]">
-            <div class="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4 sm:px-6">
-                <Link href="/saya"><BrandMark /></Link>
-                <nav class="hidden h-full items-stretch gap-1 md:flex" aria-label="Navigasi utama">
+            <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+                <Link href="/saya" class="flex min-h-11 items-center"><BrandMark /></Link>
+                <nav class="hidden h-full items-stretch gap-1 lg:flex" aria-label="Navigasi utama">
                     <Link v-for="n in nav" :key="n.href" :href="n.href" :aria-current="active(n) ? 'page' : undefined" :class="['relative flex items-center px-3 text-sm font-semibold transition-colors', active(n) ? 'text-primary-900 after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:bg-primary-600' : 'text-neutral-600 hover:text-neutral-950']">{{ n.label }}</Link>
                     <Link href="/saya/pengumuman" :class="['relative flex items-center px-3 text-sm font-semibold transition-colors', annActive ? 'text-primary-900 after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:bg-primary-600' : 'text-neutral-600 hover:text-neutral-950']">Pengumuman</Link>
                 </nav>
@@ -42,9 +42,9 @@ const unread = computed(() => page.props.notifications?.unread ?? 0);
             </div>
         </header>
 
-        <main id="konten" class="mx-auto max-w-5xl px-4 pt-6 pb-28 sm:px-6 sm:pt-8 md:pb-14"><PageShell><slot /></PageShell></main>
+        <main id="konten" class="mx-auto max-w-6xl px-4 pt-6 pb-28 sm:px-6 sm:pt-8 lg:pb-14"><PageShell><slot /></PageShell></main>
 
-        <nav class="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-white pb-[env(safe-area-inset-bottom)] md:hidden" aria-label="Navigasi bawah">
+        <nav class="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden" aria-label="Navigasi bawah">
             <ul class="grid grid-cols-5">
                 <li v-for="n in nav" :key="n.href">
                     <Link :href="n.href" :aria-current="active(n) ? 'page' : undefined" :class="['relative flex min-h-14 flex-col items-center justify-center gap-0.5 text-[11px] font-semibold', active(n) ? 'text-primary-700 before:absolute before:inset-x-5 before:top-0 before:h-0.5 before:bg-primary-600' : 'text-neutral-600']">

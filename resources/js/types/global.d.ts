@@ -17,7 +17,7 @@ declare module '@inertiajs/core' {
         sharedPageProps: {
             name: string;
             auth: { user: AuthUser | null };
-            school: { name: string; address: string | null; has_logo: boolean } | null;
+            school: { name: string; address: string | null; has_logo: boolean; logo_v: string | null } | null;
             notifications: { unread: number; items: NotificationItem[] } | null;
             credentials: Credentials | null;
             [key: string]: unknown;

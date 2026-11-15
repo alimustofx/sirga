@@ -15,7 +15,7 @@ defineEmits<{ duplicate: [] }>();
         <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
                 <p class="eyebrow">{{ period.year }}</p>
-                <Link :href="`/admin/periode/${period.id}`" class="block text-2xl font-bold tracking-tight text-primary-900 hover:underline">{{ monthName(period.month) }}</Link>
+                <Link :href="`/admin/periode/${period.id}`" class="-my-1 inline-flex min-h-11 items-center text-2xl font-bold tracking-tight text-primary-900 hover:underline">{{ monthName(period.month) }}</Link>
             </div>
             <PayrollStatusBadge :status="period.status" />
         </div>

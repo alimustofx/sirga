@@ -45,7 +45,7 @@ const submit = () =>
             <label for="proof" :class="['flex min-h-40 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-4 py-7 text-center transition-all duration-200', drag ? 'scale-[1.01] border-primary-600 bg-primary-600/5' : error ? 'border-[#dc2626] bg-danger-bg/30' : 'border-neutral-400 hover:border-primary-600 hover:bg-neutral-50']"
                 @dragover.prevent="drag = true" @dragleave="drag = false" @drop.prevent="drop">
                 <span :class="['flex size-12 items-center justify-center rounded-2xl transition-colors', form.proof ? 'bg-success-bg text-success-fg' : 'bg-primary-600/10 text-primary-600']"><FileCheck2 v-if="form.proof" class="size-6" /><CloudUpload v-else class="size-6" /></span>
-                <span class="text-sm font-semibold text-primary-900">{{ form.proof ? 'Ganti file' : 'Seret file ke sini atau klik untuk memilih' }}</span>
+                <span class="text-sm font-semibold text-primary-900">{{ form.proof ? 'Ganti file' : '' }}<template v-if="!form.proof"><span class="hidden sm:inline">Seret file ke sini atau klik untuk memilih</span><span class="sm:hidden">Ketuk untuk memilih foto atau file</span></template></span>
                 <span class="text-xs text-neutral-600">JPG, PNG, atau PDF · maksimal {{ Math.round(maxKb / 1024) }} MB</span>
                 <input id="proof" ref="input" type="file" accept="image/jpeg,image/png,application/pdf" class="sr-only" @change="pick" />
             </label>

@@ -77,6 +77,11 @@ class DashboardController extends Controller
 
         return Inertia::render('admin/Dashboard', [
             'tasks' => $tasks,
+            'currentTotals' => $period ? ($trend->firstWhere('id', $period->id) ?? (function () use ($period) {
+                $t = PayrollRecord::where('payroll_period_id', $period->id)->selectRaw('coalesce(sum(take_home_pay),0) t')->first();
+
+                return ['take_home' => Money::str($t->t)];
+            })()) : null,
             'trend' => $trend,
             'collection' => $collection,
             'cards' => [

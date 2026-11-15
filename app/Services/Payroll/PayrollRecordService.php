@@ -88,7 +88,7 @@ class PayrollRecordService
                     $comp = EarningComponent::findOrFail($row['component_id'] ?? 0);
                     $item = PayrollRecordItem::create([
                         'payroll_record_id' => $record->id, 'earning_component_id' => $comp->id,
-                        'component_name_snapshot' => $comp->name, 'component_type' => $type,
+                        'component_name_snapshot' => $comp->name, 'component_type' => $comp->component_type, // tipe mengikuti master, bukan input klien
                         'amount' => Money::str($amount), 'display_order' => $i + 1,
                     ]);
                 }

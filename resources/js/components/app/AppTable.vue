@@ -45,13 +45,13 @@ const isLoading = () => props.loading ?? navigating.table;
         <ul class="divide-y divide-neutral-100 md:hidden">
             <li v-for="(r, i) in rows" :key="key(r, i)" class="space-y-2.5 px-4 py-3.5">
                 <div class="flex items-start justify-between gap-2">
-                    <div class="min-w-0 font-semibold text-primary-900"><template v-for="c in columns.filter((x) => x.primary)" :key="c.key"><slot :name="`cell-${c.key}`" :row="r" :value="r[c.key]">{{ r[c.key] }}</slot></template></div>
+                    <div class="min-w-0 font-semibold text-primary-900 [overflow-wrap:anywhere]"><template v-for="c in columns.filter((x) => x.primary)" :key="c.key"><slot :name="`cell-${c.key}`" :row="r" :value="r[c.key]">{{ r[c.key] }}</slot></template></div>
                     <slot name="actions" :row="r" />
                 </div>
-                <dl class="grid grid-cols-2 gap-x-3 gap-y-1.5 text-[13px]">
+                <dl class="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-4 gap-y-2 text-[13px]">
                     <template v-for="c in columns.filter((x) => !x.primary && x.mobile !== false)" :key="c.key">
                         <dt class="text-neutral-600">{{ c.label }}</dt>
-                        <dd :class="['text-right text-neutral-950', c.align === 'right' ? 'num' : '']"><slot :name="`cell-${c.key}`" :row="r" :value="r[c.key]">{{ r[c.key] }}</slot></dd>
+                        <dd :class="['min-w-0 justify-self-end text-right text-neutral-950', c.align === 'right' ? 'num' : '']"><slot :name="`cell-${c.key}`" :row="r" :value="r[c.key]">{{ r[c.key] }}</slot></dd>
                     </template>
                 </dl>
             </li>

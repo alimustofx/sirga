@@ -12,6 +12,7 @@ const widths = { md: 'sm:max-w-lg', lg: 'sm:max-w-2xl', xl: 'sm:max-w-4xl' };
         <DialogPortal>
             <DialogOverlay class="fixed inset-0 z-50 bg-neutral-950/45 data-[state=open]:animate-in data-[state=open]:fade-in-0" />
             <DialogContent
+                @open-auto-focus.prevent
                 :class="['fixed inset-0 z-50 flex max-h-dvh w-full flex-col overflow-hidden bg-white shadow-modal sm:inset-auto sm:top-1/2 sm:left-1/2 sm:max-h-[90dvh] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-[14px]', widths[size]]"
             >
                 <div class="flex items-start justify-between gap-3 border-b border-neutral-200 px-5 py-4">

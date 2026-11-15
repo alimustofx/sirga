@@ -38,7 +38,7 @@ defineProps<{ periods: Period[]; period: Period | null; payment: PaymentInfo | n
         <div v-else-if="payment.status === 'menunggu_verifikasi'" class="rounded-2xl border border-[#93c5fd] bg-info-bg p-4 text-sm text-info-fg">Bukti transfer Anda sedang diperiksa bendahara. Anda akan mendapat notifikasi setelah diverifikasi.</div>
         <div v-else-if="payment.closed" class="rounded-2xl border border-neutral-200 bg-neutral-100 p-4 text-sm text-neutral-800">Periode pembayaran ini telah ditutup.</div>
 
-        <div class="grid items-start gap-4 lg:grid-cols-2">
+        <div class="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
             <BankAccountCard :account="payment.account" />
             <TransferInstructionCard :total="payment.total" :note="payment.transfer_note" />
         </div>

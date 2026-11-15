@@ -51,12 +51,12 @@ const stats = computed(() => props.current ? [
 
         <StatStrip :items="stats" />
 
-        <div class="grid gap-4 lg:grid-cols-5">
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-5">
             <AppCard title="Komposisi gaji kotor" :subtitle="current.period.label" class="lg:col-span-2"><ComposeBar :parts="parts" /></AppCard>
             <AppCard title="Yang diterimakan per bulan" subtitle="Enam periode terakhir" class="lg:col-span-3"><TrendBars :items="bars" :height="150" aria-label="Grafik yang diterimakan per periode" /></AppCard>
         </div>
 
-        <div class="grid gap-4 lg:grid-cols-5">
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-5">
             <AppCard title="Pembayaran potongan sekolah" class="lg:col-span-3" accent="gold">
                 <template v-if="current.payment.has_payable">
                     <div class="mb-5 flex flex-wrap items-center justify-between gap-2"><span class="num text-xl font-bold text-primary-900">{{ rupiah(current.payment.total) }}</span><PaymentStatusBadge :status="current.payment.status" /></div>
@@ -69,7 +69,7 @@ const stats = computed(() => props.current ? [
             </AppCard>
 
             <AppCard title="Pengumuman" class="lg:col-span-2" flush>
-                <template #header><Link href="/saya/pengumuman" class="text-[13px] font-semibold text-primary-600 hover:underline">Semua</Link></template>
+                <template #header><Link href="/saya/pengumuman" class="inline-flex min-h-10 items-center px-1 text-[13px] font-semibold text-primary-600 hover:underline">Semua</Link></template>
                 <ul v-if="announcements.length" class="divide-y divide-neutral-100">
                     <li v-for="a in announcements" :key="a.id"><Link :href="`/saya/pengumuman/${a.id}`" class="block px-4 py-3 hover:bg-neutral-50 sm:px-5"><p class="text-sm font-semibold text-neutral-950">{{ a.title }}</p><p class="mt-0.5 line-clamp-2 text-[13px] text-neutral-600">{{ a.excerpt }}</p><p class="mt-1 text-xs text-neutral-400">{{ formatDate(a.published_at) }}</p></Link></li>
                 </ul>

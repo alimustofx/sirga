@@ -84,8 +84,10 @@
 
 @layer base {
     html {
-        font-size: 14px;
+        font-size: 16px; /* 16px: text-sm = 14px (nyaman dibaca di ponsel) */
         -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+        touch-action: manipulation; /* cegah zoom ganda saat double-tap */
     }
     body {
         background: var(--color-neutral-50);
@@ -118,7 +120,6 @@
 @layer components {
     .num {
         font-variant-numeric: tabular-nums;
-        white-space: nowrap;
     }
     /* label kecil kapital — gaya buku besar */
     .eyebrow {
@@ -160,5 +161,17 @@
     .thin-scroll {
         scrollbar-width: thin;
         scrollbar-color: var(--color-neutral-400) transparent;
+    }
+}
+
+/*
+  iOS Safari memperbesar (zoom) halaman saat fokus ke input berfont < 16px.
+  Aturan ini sengaja DI LUAR @layer agar menang atas utilitas Tailwind.
+*/
+@media (max-width: 767px) {
+    input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']),
+    select,
+    textarea {
+        font-size: 16px !important;
     }
 }

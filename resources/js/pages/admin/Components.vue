@@ -8,12 +8,21 @@ import AppInput from '@/components/app/AppInput.vue';
 import AppPageHeader from '@/components/app/AppPageHeader.vue';
 import AppSelect from '@/components/app/AppSelect.vue';
 import AppTable from '@/components/app/AppTable.vue';
+import AppPagination from '@/components/app/AppPagination.vue';
 import { confirmAction } from '@/composables/useConfirm';
+import { usePaged } from '@/composables/usePaged';
 import { Head, router, useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Search } from '@lucide/vue';
+import { computed, ref, watch } from 'vue';
 
 type Comp = { id: number; name: string; type: string; type_label: string; applicable_status: string; display_order: number; is_active: boolean; usage: number };
-defineProps<{ components: Comp[] }>();
+const props = defineProps<{ components: Comp[] }>();
+
+const q = ref('');
+const typeFilter = ref('');
+const filtered = computed(() => props.components.filter((c) => (!typeFilter.value || c.type === typeFilter.value) && (!q.value || c.name.toLowerCase().includes(q.value.toLowerCase()))));
+const { page, perPage, items: shown, meta, reset } = usePaged(() => filtered.value, 10);
+watch([q, typeFilter], reset);
 
 const open = ref(false);
 const editing = ref<Comp | null>(null);
@@ -42,11 +51,13 @@ async function remove(c: Comp): Promise<void> {
         <AppButton @click="create">Tambah komponen</AppButton>
     </AppPageHeader>
     <AppCard flush>
-        <AppTable :columns="columns" :rows="components">
+        <div class="grid grid-cols-1 gap-3 border-b border-neutral-200 p-4 sm:grid-cols-[1fr_14rem]"><AppInput v-model="q" placeholder="Cari nama komponen…" :icon="Search" inputmode="search" /><AppSelect v-model="typeFilter" placeholder="Semua jenis" :options="[{ value: 'earning', label: 'Penghasilan' }, { value: 'official_deduction', label: 'Potongan Resmi' }]" /></div>
+        <AppTable :columns="columns" :rows="shown" :loading="false" empty-title="Tidak ada komponen" empty-text="Ubah pencarian atau filter jenis.">
             <template #cell-applicable_status="{ row }">{{ row.applicable_status === 'all' ? 'PNS & PPPK' : row.applicable_status }}</template>
             <template #cell-is_active="{ row }"><AppBadge :tone="row.is_active ? 'success' : 'neutral'">{{ row.is_active ? 'Aktif' : 'Nonaktif' }}</AppBadge></template>
             <template #actions="{ row }"><div class="flex gap-1"><AppButton size="sm" variant="ghost" @click="edit(row)">Ubah</AppButton><AppButton v-if="!row.usage" size="sm" variant="ghost" @click="remove(row)">Hapus</AppButton></div></template>
         </AppTable>
+        <AppPagination local :page="meta" :per-page="perPage" :per-page-options="[10, 25, 50]" @update:page="page = $event" @update:per-page="perPage = $event" />
     </AppCard>
 
     <AppDialog v-model:open="open" :title="editing ? 'Ubah Komponen' : 'Tambah Komponen'">

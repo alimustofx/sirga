@@ -58,7 +58,7 @@ async function verifyAll(): Promise<void> {
         <p v-if="missing.length" class="mb-3 text-[13px] text-warning-fg">{{ missing.length }} ASN aktif belum memiliki rincian pada periode ini.</p>
 
         <AppCard flush>
-            <div class="grid gap-3 border-b border-neutral-200 p-4 sm:grid-cols-3">
+            <div class="grid grid-cols-1 gap-3 border-b border-neutral-200 p-4 sm:grid-cols-3">
                 <AppInput v-model="f.q" placeholder="Cari nama atau NIP…" :icon="Search" inputmode="search" />
                 <AppSelect v-model="f.status" placeholder="Semua status ASN" :options="[{ value: 'PNS', label: 'PNS' }, { value: 'PPPK', label: 'PPPK' }]" />
                 <AppSelect v-model="f.validation" placeholder="Semua validasi" :options="[{ value: 'valid', label: 'Valid' }, { value: 'mismatch', label: 'Selisih sumber' }, { value: 'copied', label: 'Perlu verifikasi' }, { value: 'invalid', label: 'Tidak valid' }]" />

@@ -17,7 +17,7 @@ const label = { pending: 'Menunggu verifikasi', approved: 'Disetujui', rejected:
             <li v-for="p in proofs" :key="p.id" class="space-y-2 border-b border-neutral-100 pb-4 last:border-0 last:pb-0">
                 <div class="flex flex-wrap items-center justify-between gap-2">
                     <div class="min-w-0">
-                        <a :href="p.url" target="_blank" rel="noopener" class="block truncate text-sm font-semibold text-primary-600 hover:underline">{{ p.filename }}</a>
+                        <a :href="p.url" target="_blank" rel="noopener" class="flex min-h-9 items-center truncate text-sm font-semibold text-primary-600 hover:underline">{{ p.filename }}</a>
                         <p class="text-xs text-neutral-600">{{ fileSize(p.size) }} · diunggah {{ formatDate(p.uploaded_at, true) }}</p>
                     </div>
                     <AppBadge :tone="tone[p.status]">{{ label[p.status] }}</AppBadge>

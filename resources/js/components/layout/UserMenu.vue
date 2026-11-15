@@ -24,12 +24,12 @@ const items = computed<DropdownItem[]>(() => {
         <template #trigger>
             <button type="button" class="flex min-h-11 items-center gap-2 rounded-lg px-1.5 hover:bg-neutral-100 sm:min-h-10">
                 <span class="flex size-8 items-center justify-center rounded-full bg-primary-700 text-xs font-bold text-white">{{ initials(user.name) }}</span>
-                <span class="hidden max-w-40 truncate text-left text-sm leading-tight font-semibold text-neutral-950 md:block">{{ user.name.replace(/,.*$/, '') }}<span class="block text-xs font-normal text-neutral-600">{{ user.role_label }}</span></span>
-                <ChevronDown class="hidden size-4 text-neutral-600 md:block" />
+                <span class="hidden max-w-40 truncate text-left text-sm leading-tight font-semibold text-neutral-950 xl:block">{{ user.name.replace(/,.*$/, '') }}<span class="block text-xs font-normal text-neutral-600">{{ user.role_label }}</span></span>
+                <ChevronDown class="hidden size-4 text-neutral-600 xl:block" />
             </button>
         </template>
         <template #header>
-            <div class="border-b border-neutral-100 px-3 py-2 md:hidden">
+            <div class="border-b border-neutral-100 px-3 py-2 xl:hidden">
                 <p class="truncate text-sm font-semibold">{{ user.name }}</p>
                 <p class="text-xs text-neutral-600">{{ user.role_label }}</p>
             </div>

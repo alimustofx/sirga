@@ -19,6 +19,7 @@ type Task = { key: string; tone: 'warning' | 'success' | 'info'; title: string; 
 type Trend = { id: number; label: string; full: string; status: PeriodStatus; status_label: string; gross: string; school: string; take_home: string };
 const props = defineProps<{
     tasks: Task[];
+    currentTotals: { take_home: string } | null;
     cards: { total: number; pns: number; pppk: number; incomplete: number; pending_payments: number };
     period: (Period & { complete: number; employees: number; issues: number }) | null;
     trend: Trend[];
@@ -28,9 +29,9 @@ const props = defineProps<{
 }>();
 
 const view = ref<'chart' | 'table'>('chart');
-const current = computed(() => props.trend.find((t) => t.id === props.period?.id) ?? null);
+const current = computed(() => props.currentTotals ?? props.trend.find((t) => t.id === props.period?.id) ?? null);
 const bars = computed(() => props.trend.map((t) => ({ label: t.label, value: Number(t.take_home), full: t.full })));
-const pct = (a: string | number, b: string | number) => (Number(b) > 0 ? Math.round((Number(a) / Number(b)) * 100) : 0);
+const pct = (a: string | number, b: string | number) => (Number(b) > 0 ? (Math.round((Number(a) / Number(b)) * 1000) / 10).toLocaleString('id-ID', { maximumFractionDigits: 1 }) : '0');
 const stats = computed(() => [
     { label: 'ASN aktif', value: props.cards.total, hint: `${props.cards.pns} PNS · ${props.cards.pppk} PPPK`, to: '/admin/asn' },
     { label: 'Total diterimakan', value: current.value ? rupiah(current.value.take_home) : '—', hint: props.period ? `Periode ${props.period.label}` : 'Belum ada periode', to: props.period ? `/admin/periode/${props.period.id}` : undefined },
@@ -67,15 +68,15 @@ const tone = { warning: 'bg-gold-500', success: 'bg-primary-600', info: 'bg-[#25
 
         <StatStrip :items="stats" />
 
-        <div class="grid gap-4 lg:grid-cols-3">
+        <div class="grid grid-cols-1 items-start gap-4 lg:grid-cols-3">
             <AppCard class="lg:col-span-2" title="Total diterimakan per periode" subtitle="Enam periode terakhir">
                 <template #header>
                     <div class="flex rounded-lg border border-neutral-200 p-0.5 text-[13px] font-semibold" role="group" aria-label="Tampilan">
-                        <button v-for="o in [['chart', 'Grafik'], ['table', 'Tabel']] as const" :key="o[0]" type="button" :aria-pressed="view === o[0]" :class="['min-h-8 rounded-md px-3', view === o[0] ? 'bg-primary-900 text-white' : 'text-neutral-600 hover:text-neutral-950']" @click="view = o[0]">{{ o[1] }}</button>
+                        <button v-for="o in [['chart', 'Grafik'], ['table', 'Tabel']] as const" :key="o[0]" type="button" :aria-pressed="view === o[0]" :class="['min-h-10 rounded-md px-3.5 sm:min-h-8', view === o[0] ? 'bg-primary-900 text-white' : 'text-neutral-600 hover:text-neutral-950']" @click="view = o[0]">{{ o[1] }}</button>
                     </div>
                 </template>
                 <template v-if="trend.length">
-                    <TrendBars v-if="view === 'chart'" :items="bars" aria-label="Grafik total diterimakan per periode" />
+                    <TrendBars v-if="view === 'chart'" :items="bars" :height="240" aria-label="Grafik total diterimakan per periode" />
                     <div v-else class="-mx-4 -my-4 sm:-mx-5 sm:-my-5">
                         <AppTable :columns="tcols" :rows="trend" :loading="false">
                             <template #cell-status="{ row }"><PayrollStatusBadge :status="row.status" :label="row.status_label" /></template>
@@ -97,7 +98,7 @@ const tone = { warning: 'bg-gold-500', success: 'bg-primary-600', info: 'bg-[#25
                 <AppCard v-else title="Penagihan potongan sekolah"><p class="text-sm text-neutral-600">Tampil setelah periode dipublikasikan.</p></AppCard>
 
                 <AppCard title="Menunggu verifikasi" flush>
-                    <template #header><Link href="/admin/pembayaran" class="text-[13px] font-semibold text-primary-600 hover:underline">Lihat semua</Link></template>
+                    <template #header><Link href="/admin/pembayaran" class="inline-flex min-h-10 items-center px-1 text-[13px] font-semibold text-primary-600 hover:underline">Lihat semua</Link></template>
                     <p v-if="!pending.length" class="px-5 py-5 text-sm text-neutral-600">Tidak ada bukti transfer yang menunggu.</p>
                     <ul v-else class="divide-y divide-neutral-100">
                         <li v-for="p in pending.slice(0, 5)" :key="p.id"><Link :href="`/admin/pembayaran/${p.id}`" class="flex items-center justify-between gap-3 px-4 py-2.5 hover:bg-neutral-50 sm:px-5"><span class="truncate text-sm font-medium">{{ p.name }}</span><span class="num text-sm text-neutral-800">{{ rupiah(p.amount) }}</span></Link></li>

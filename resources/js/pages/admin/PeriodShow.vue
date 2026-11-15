@@ -54,7 +54,7 @@ const bcols = [{ key: 'filename', label: 'File', primary: true }, { key: 'status
 
     <AppCard class="mb-4"><PeriodTimeline :status="period.status" :published-at="period.published_at" :closed-at="period.closed_at" /></AppCard>
 
-    <div class="grid grid-cols-2 gap-3 lg:grid-cols-5">
+    <div class="grid grid-cols-2 gap-3 xl:grid-cols-5">
         <StatCard label="Kelengkapan" :value="`${readiness.stats.complete}/${readiness.stats.employees}`" hint="ASN aktif punya rincian" />
         <StatCard label="Gaji kotor" :value="rupiah(totals.gross)" />
         <StatCard label="Penghasilan bersih" :value="rupiah(totals.net)" />
@@ -62,7 +62,7 @@ const bcols = [{ key: 'filename', label: 'File', primary: true }, { key: 'status
         <StatCard label="Total diterimakan" :value="rupiah(totals.take_home)" class="col-span-2 lg:col-span-1" />
     </div>
 
-    <div class="mt-4 grid gap-4 lg:grid-cols-3">
+    <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div class="space-y-4 lg:col-span-2">
             <AppCard title="Pemeriksaan Sebelum Publikasi" :accent="readiness.ready ? 'teal' : 'gold'">
                 <div class="mb-4"><p class="mb-2 text-sm text-neutral-600"><span class="num font-semibold text-neutral-950">{{ readiness.stats.complete }}</span> dari <span class="num font-semibold text-neutral-950">{{ readiness.stats.employees }}</span> ASN aktif sudah memiliki rincian.</p><ProgressBar :value="readiness.stats.employees ? (readiness.stats.complete / readiness.stats.employees) * 100 : 0" /></div>
@@ -80,7 +80,7 @@ const bcols = [{ key: 'filename', label: 'File', primary: true }, { key: 'status
             <AppCard title="Riwayat Impor Excel" flush>
                 <template #header><AppButton v-if="['draft', 'review'].includes(period.status)" size="sm" :href="`/admin/periode/${period.id}/impor`">Impor baru</AppButton></template>
                 <AppTable :columns="bcols" :rows="batches" empty-title="Belum ada impor">
-                    <template #cell-filename="{ row }"><a :href="`/admin/impor/${row.id}`" class="font-semibold text-primary-600 hover:underline">{{ row.filename }}</a><span class="block text-xs text-neutral-600">{{ formatDate(row.at, true) }}</span></template>
+                    <template #cell-filename="{ row }"><a :href="`/admin/impor/${row.id}`" class="font-semibold break-all text-primary-600 hover:underline">{{ row.filename }}</a><span class="block text-xs text-neutral-600">{{ formatDate(row.at, true) }}</span></template>
                     <template #cell-state="{ row }"><AppBadge :tone="row.state === 'imported' ? 'success' : row.state === 'previewed' ? 'warning' : 'neutral'">{{ state[row.state] }}</AppBadge></template>
                 </AppTable>
             </AppCard>

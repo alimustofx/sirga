@@ -96,6 +96,13 @@ say "7) Dependensi"
 [ -d vendor ] && ok "vendor/ ada" || warn "vendor/ belum ada → jalankan: composer install"
 [ -d node_modules ] && ok "node_modules/ ada" || warn "node_modules/ belum ada → jalankan: npm install"
 [ -f .env ] && ok ".env ada" || warn ".env belum ada → cp .env.example .env && php artisan key:generate"
+if [ -f .env ]; then
+    ENVV="$(grep -E '^APP_ENV=' .env | head -1 | cut -d= -f2- | tr -d '"')"
+    DBG="$(grep -E '^APP_DEBUG=' .env | head -1 | cut -d= -f2- | tr -d '"')"
+    if [ "$ENVV" = "production" ] && [ "$DBG" = "true" ]; then bad "APP_ENV=production tetapi APP_DEBUG=true → set APP_DEBUG=false (debug membocorkan detail sistem)"; FAILED=$((FAILED + 1)); fi
+    if [ "$ENVV" = "production" ] && ! grep -qE '^SESSION_SECURE_COOKIE=true' .env; then warn "Produksi: tambahkan SESSION_SECURE_COOKIE=true (cookie hanya lewat HTTPS)"; fi
+    grep -qE '^APP_KEY=base64:' .env && ok "APP_KEY terisi" || warn "APP_KEY belum diisi → php artisan key:generate"
+fi
 
 say ""
 say "────────────────────────────────────────"

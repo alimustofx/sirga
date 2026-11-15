@@ -71,7 +71,7 @@ const statusOpts = [{ value: 'PNS', label: 'PNS' }, { value: 'PPPK', label: 'PPP
     </AppPageHeader>
 
     <AppCard flush>
-        <div class="grid gap-3 border-b border-neutral-200 p-4 sm:grid-cols-3">
+        <div class="grid grid-cols-1 gap-3 border-b border-neutral-200 p-4 sm:grid-cols-3">
             <AppInput v-model="f.q" placeholder="Cari nama atau NIP…" inputmode="search" />
             <AppSelect v-model="f.status" placeholder="Semua status ASN" :options="statusOpts" />
             <AppSelect v-model="f.active" placeholder="Semua akun" :options="[{ value: '1', label: 'Aktif' }, { value: '0', label: 'Nonaktif' }]" />
@@ -94,7 +94,7 @@ const statusOpts = [{ value: 'PNS', label: 'PNS' }, { value: 'PPPK', label: 'PPP
     </AppCard>
 
     <AppDialog v-model:open="open" :title="editing ? 'Ubah Data ASN' : 'Tambah ASN'" :description="editing ? undefined : 'Password awal acak akan dibuat dan ditampilkan sekali.'" size="lg">
-        <form id="emp-form" class="grid gap-3 sm:grid-cols-2" @submit.prevent="save">
+        <form id="emp-form" class="grid grid-cols-1 gap-3 sm:grid-cols-2" @submit.prevent="save">
             <AppInput v-model="form.nip" label="NIP" inputmode="numeric" :error="form.errors.nip" required class="sm:col-span-2" />
             <AppInput v-model="form.full_name" label="Nama lengkap (beserta gelar)" :error="form.errors.full_name" required class="sm:col-span-2" />
             <AppSelect v-model="form.employment_status" label="Status ASN" :options="statusOpts" :error="form.errors.employment_status" required />

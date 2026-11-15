@@ -7,6 +7,8 @@ import AppEmptyState from '@/components/app/AppEmptyState.vue';
 import AppInput from '@/components/app/AppInput.vue';
 import AppPageHeader from '@/components/app/AppPageHeader.vue';
 import AppSelect from '@/components/app/AppSelect.vue';
+import AppPagination from '@/components/app/AppPagination.vue';
+import { usePaged } from '@/composables/usePaged';
 import { months } from '@/lib/format';
 import type { Period } from '@/types';
 import { Head, useForm } from '@inertiajs/vue3';
@@ -15,6 +17,7 @@ import { ref } from 'vue';
 type P = Period & { records: number; employees: number; completeness: number; published_at: string | null };
 const props = defineProps<{ periods: P[]; defaults: { month: number; year: number } }>();
 
+const { page, perPage, items: shown, meta } = usePaged(() => props.periods, 9);
 const open = ref(false);
 const source = ref<P | null>(null);
 const form = useForm({ month: props.defaults.month, year: props.defaults.year, notes: '' });
@@ -32,10 +35,13 @@ function save(): void {
     <AppPageHeader title="Periode Gaji" subtitle="Siklus: Draft → Review → Published → Closed."><AppButton @click="create">Buat periode</AppButton></AppPageHeader>
 
     <AppCard v-if="!periods.length"><AppEmptyState title="Belum ada periode gaji" description="Buat periode pertama, lalu impor file Excel penggajian."><AppButton @click="create">Buat periode</AppButton></AppEmptyState></AppCard>
-    <div v-else class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"><PayrollPeriodCard v-for="p in periods" :key="p.id" :period="p" @duplicate="duplicate(p)" /></div>
+    <template v-else>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3"><PayrollPeriodCard v-for="p in shown" :key="p.id" :period="p" @duplicate="duplicate(p)" /></div>
+        <div v-if="meta.last_page > 1" class="mt-4 overflow-hidden rounded-xl border border-neutral-200 bg-white"><AppPagination local :page="meta" :per-page="perPage" :per-page-options="[9, 18, 36]" @update:page="page = $event" @update:per-page="perPage = $event" /></div>
+    </template>
 
     <AppDialog v-model:open="open" :title="source ? `Gandakan ${source.label}` : 'Buat Periode Baru'" :description="source ? 'Jenis potongan dan nominal disalin sebagai bahan awal. Seluruh rincian wajib diverifikasi ulang sebelum publikasi. Data pembayaran tidak disalin.' : undefined">
-        <form id="period-form" class="grid gap-3 sm:grid-cols-2" @submit.prevent="save">
+        <form id="period-form" class="grid grid-cols-1 gap-3 sm:grid-cols-2" @submit.prevent="save">
             <AppSelect v-model="form.month" label="Bulan" :options="months" :error="form.errors.month" required />
             <AppInput v-model="form.year" label="Tahun" type="number" :error="form.errors.year" required />
             <AppInput v-if="!source" v-model="form.notes" label="Catatan (opsional)" class="sm:col-span-2" :error="form.errors.notes" />

@@ -16,7 +16,7 @@ const f = useFilters('/admin/audit', props.filters);
     <Head title="Audit Aktivitas" />
     <AppPageHeader title="Audit Aktivitas" subtitle="Catatan perubahan data penting. Log tidak dapat diubah atau dihapus." />
     <AppCard flush>
-        <div class="grid gap-3 border-b border-neutral-200 p-4 sm:grid-cols-3">
+        <div class="grid grid-cols-1 gap-3 border-b border-neutral-200 p-4 sm:grid-cols-3">
             <AppInput v-model="f.q" placeholder="Cari aksi, pengguna, atau alasan…" inputmode="search" />
             <AppInput v-model="f.from" type="date" />
             <AppInput v-model="f.to" type="date" />

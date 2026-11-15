@@ -30,7 +30,7 @@ function readAll(): void {
             <PopoverContent align="end" :side-offset="8" class="z-50 w-[min(22rem,calc(100vw-1.5rem))] rounded-xl border border-neutral-200 bg-white shadow-modal">
                 <div class="flex items-center justify-between border-b border-neutral-200 px-4 py-3">
                     <p class="text-sm font-semibold text-primary-900">Notifikasi</p>
-                    <button v-if="data?.unread" type="button" class="text-[13px] font-semibold text-primary-600 hover:underline" @click="readAll">Tandai semua dibaca</button>
+                    <button v-if="data?.unread" type="button" class="inline-flex min-h-10 items-center px-1 text-[13px] font-semibold text-primary-600 hover:underline" @click="readAll">Tandai semua dibaca</button>
                 </div>
                 <ul v-if="data?.items.length" class="max-h-96 divide-y divide-neutral-100 overflow-y-auto">
                     <li v-for="n in data.items" :key="n.id">

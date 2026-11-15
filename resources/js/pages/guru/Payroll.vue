@@ -45,7 +45,7 @@ const parts = computed(() => props.payroll ? [
 
         <AppCard title="Komposisi gaji kotor" :subtitle="`Dari ${rupiah(payroll.gross)}`"><ComposeBar :parts="parts" /></AppCard>
 
-        <div class="grid items-start gap-4 lg:grid-cols-2">
+        <div class="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
             <div class="space-y-4">
                 <EarningBreakdown :lines="payroll.earnings" :total="payroll.gross" />
                 <OfficialDeductionBreakdown :lines="payroll.official" :total="payroll.official_total" />

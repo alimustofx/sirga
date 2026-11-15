@@ -8,7 +8,9 @@ import AppInput from '@/components/app/AppInput.vue';
 import AppPageHeader from '@/components/app/AppPageHeader.vue';
 import AppSelect from '@/components/app/AppSelect.vue';
 import AppTextarea from '@/components/app/AppTextarea.vue';
+import AppPagination from '@/components/app/AppPagination.vue';
 import { confirmAction } from '@/composables/useConfirm';
+import { usePaged } from '@/composables/usePaged';
 import { formatDate } from '@/lib/format';
 import type { Period } from '@/types';
 import { Head, router, useForm } from '@inertiajs/vue3';
@@ -17,6 +19,7 @@ import { computed, ref } from 'vue';
 type Item = { id: number; title: string; content: string; target_type: string; state: string; period_id: number | null; published_at: string | null; recipients: number[] };
 const props = defineProps<{ items: Item[]; employees: { id: number; full_name: string; nip: string }[]; periods: Period[] }>();
 
+const { page, perPage, items: shown, meta } = usePaged(() => props.items, 8);
 const open = ref(false);
 const editing = ref<Item | null>(null);
 const search = ref('');
@@ -47,7 +50,7 @@ async function remove(a: Item): Promise<void> {
 
     <AppCard v-if="!items.length"><AppEmptyState title="Belum ada pengumuman" /></AppCard>
     <div v-else class="space-y-3">
-        <article v-for="a in items" :key="a.id" class="rounded-xl border border-neutral-200 bg-white p-4 shadow-card">
+        <article v-for="a in shown" :key="a.id" class="rounded-xl border border-neutral-200 bg-white p-4 shadow-card">
             <div class="flex flex-wrap items-start justify-between gap-2">
                 <div class="min-w-0"><h3 class="text-base font-semibold text-primary-900">{{ a.title }}</h3><p class="text-xs text-neutral-600">Untuk {{ targetLabel[a.target_type] }} · {{ a.published_at ? formatDate(a.published_at, true) : 'belum diterbitkan' }}</p></div>
                 <AppBadge :tone="stateTone[a.state as keyof typeof stateTone]">{{ stateLabel[a.state as keyof typeof stateLabel] }}</AppBadge>
@@ -55,13 +58,14 @@ async function remove(a: Item): Promise<void> {
             <p class="mt-2 line-clamp-2 text-sm text-neutral-800">{{ a.content }}</p>
             <div class="mt-3 flex flex-wrap gap-2"><AppButton size="sm" variant="outline" @click="edit(a)">Ubah</AppButton><AppButton size="sm" variant="ghost" @click="router.post(`/admin/pengumuman/${a.id}/arsip`, {}, { preserveScroll: true })">{{ a.state === 'archived' ? 'Aktifkan' : 'Arsipkan' }}</AppButton><AppButton size="sm" variant="ghost" @click="remove(a)">Hapus</AppButton></div>
         </article>
+        <div class="overflow-hidden rounded-xl border border-neutral-200 bg-white"><AppPagination local :page="meta" :per-page="perPage" :per-page-options="[8, 16, 32]" @update:page="page = $event" @update:per-page="perPage = $event" /></div>
     </div>
 
     <AppDialog v-model:open="open" :title="editing ? 'Ubah Pengumuman' : 'Buat Pengumuman'" size="lg">
         <form id="ann-form" class="space-y-3" @submit.prevent="save">
             <AppInput v-model="form.title" label="Judul" :error="form.errors.title" required />
             <AppTextarea v-model="form.content" label="Isi pengumuman" :rows="5" :error="form.errors.content" required />
-            <div class="grid gap-3 sm:grid-cols-2">
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <AppSelect v-model="form.target_type" label="Ditujukan kepada" :options="[{ value: 'all', label: 'Semua ASN' }, { value: 'pns', label: 'PNS' }, { value: 'pppk', label: 'PPPK' }, { value: 'individual', label: 'ASN tertentu' }]" />
                 <AppSelect v-model="form.period_id" label="Periode terkait (opsional)" placeholder="Tidak terkait" :options="periods.map((p) => ({ value: p.id, label: p.label }))" />
             </div>
@@ -71,7 +75,7 @@ async function remove(a: Item): Promise<void> {
                 <p class="mt-1 text-[13px] text-neutral-600">{{ form.recipients.length }} dipilih</p>
                 <p v-if="form.errors.recipients" class="text-[13px] text-danger-fg">{{ form.errors.recipients }}</p>
             </div>
-            <div class="grid gap-3 sm:grid-cols-2">
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <AppSelect v-model="form.publish_mode" label="Penerbitan" :options="[{ value: 'now', label: 'Terbitkan sekarang' }, { value: 'schedule', label: 'Jadwalkan' }, { value: 'draft', label: 'Simpan sebagai draft' }]" />
                 <AppInput v-if="form.publish_mode === 'schedule'" v-model="form.publish_at" label="Tanggal & jam terbit" type="datetime-local" :error="form.errors.publish_at" />
             </div>

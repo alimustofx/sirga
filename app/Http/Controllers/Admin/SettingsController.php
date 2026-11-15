@@ -19,7 +19,7 @@ class SettingsController extends Controller
         $a = PaymentAccount::current();
 
         return Inertia::render('admin/Settings', [
-            'school' => ['school_name' => $s->school_name, 'school_address' => $s->school_address, 'has_logo' => filled($s->school_logo), 'has_letterhead' => filled($s->school_letterhead)],
+            'school' => ['school_name' => $s->school_name, 'school_address' => $s->school_address, 'has_logo' => filled($s->school_logo), 'logo_v' => $s->school_logo ? substr(md5($s->school_logo), 0, 8) : null, 'has_letterhead' => filled($s->school_letterhead)],
             'document' => ['treasurer_name' => $s->treasurer_name, 'treasurer_nip' => $s->treasurer_nip, 'has_qr' => filled($s->treasurer_signature_qr), 'show_zero_deductions' => $s->show_zero_deductions, 'default_bank_information' => $s->default_bank_information],
             'account' => ['bank_name' => $a?->bank_name, 'account_number' => $a?->account_number, 'account_holder' => $a?->account_holder, 'payment_instruction' => $a?->payment_instruction],
             'isSuper' => $request->user()->isSuperAdmin(),
@@ -34,8 +34,12 @@ class SettingsController extends Controller
             'letterhead' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:'.config('sirga.logo_max_kb')],
         ]);
         $s = SchoolSetting::current();
+        $oldLogo = $s->school_logo;
         $s->fill(['school_name' => $data['school_name'], 'school_address' => $data['school_address'] ?? null]);
         $s->school_logo = $this->store($request, 'logo', $s->school_logo, 'logo');
+        if ($oldLogo && $oldLogo !== $s->school_logo) {
+            Storage::disk('local')->delete(['school-assets/fav-'.md5($oldLogo).'-64.png', 'school-assets/fav-'.md5($oldLogo).'-180.png']);
+        }
         $s->school_letterhead = $this->store($request, 'letterhead', $s->school_letterhead, 'kop');
         $s->save();
         Audit::log('settings.school', $s, null, ['nama' => $s->school_name]);

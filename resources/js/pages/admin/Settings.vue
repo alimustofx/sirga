@@ -10,7 +10,7 @@ import { Head, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 const props = defineProps<{
-    school: { school_name: string; school_address: string | null; has_logo: boolean; has_letterhead: boolean };
+    school: { school_name: string; school_address: string | null; has_logo: boolean; logo_v: string | null; has_letterhead: boolean };
     document: { treasurer_name: string | null; treasurer_nip: string | null; has_qr: boolean; show_zero_deductions: boolean; default_bank_information: string | null };
     account: { bank_name: string | null; account_number: string | null; account_holder: string | null; payment_instruction: string | null };
     isSuper: boolean;
@@ -34,7 +34,7 @@ const file = (e: Event) => (e.target as HTMLInputElement).files?.[0] ?? null;
         <form class="max-w-xl space-y-3" @submit.prevent="school.post('/admin/pengaturan/sekolah', { forceFormData: true, preserveScroll: true })">
             <AppInput v-model="school.school_name" label="Nama sekolah" :error="school.errors.school_name" required />
             <AppTextarea v-model="school.school_address" label="Alamat" :rows="2" :error="school.errors.school_address" />
-            <div><label for="logo" class="mb-1.5 block text-[13px] font-semibold">Logo sekolah (PNG/JPG, maks. 2 MB)</label><div class="flex items-center gap-3"><img v-if="props.school.has_logo" src="/admin/aset/logo" alt="Logo saat ini" class="size-12 rounded-lg border border-neutral-200 object-contain" /><input id="logo" type="file" accept="image/png,image/jpeg" class="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-neutral-100 file:px-3 file:py-2 file:font-semibold" @change="school.logo = file($event)" /></div><p v-if="school.errors.logo" class="mt-1 text-[13px] text-danger-fg">{{ school.errors.logo }}</p></div>
+            <div><label for="logo" class="mb-1.5 block text-[13px] font-semibold">Logo sekolah (PNG/JPG, maks. 2 MB)</label><p class="mb-2 text-xs text-neutral-600">Logo ini juga dipakai sebagai ikon tab browser (favicon) dan ikon layar utama ponsel.</p><div class="flex items-center gap-3"><img v-if="props.school.has_logo" :src="`/admin/aset/logo?v=${props.school.logo_v ?? ''}`" alt="Logo saat ini" class="size-12 rounded-lg border border-neutral-200 object-contain" /><input id="logo" type="file" accept="image/png,image/jpeg" class="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-neutral-100 file:px-3 file:py-2 file:font-semibold" @change="school.logo = file($event)" /></div><p v-if="school.errors.logo" class="mt-1 text-[13px] text-danger-fg">{{ school.errors.logo }}</p></div>
             <AppButton type="submit" :loading="school.processing">Simpan identitas</AppButton>
         </form>
     </AppCard>

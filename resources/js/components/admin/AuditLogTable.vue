@@ -17,7 +17,7 @@ const pretty = (v: unknown): string => (typeof v === 'object' && v !== null ? JS
             </button>
             <div v-if="openId === l.id" class="space-y-2 bg-neutral-50 px-4 py-3 text-[13px] sm:px-5">
                 <p v-if="l.reason"><strong>Alasan:</strong> {{ l.reason }}</p>
-                <div class="grid gap-2 sm:grid-cols-2">
+                <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     <div v-if="l.old"><p class="mb-1 font-semibold text-neutral-600">Sebelum</p><pre class="max-h-60 overflow-auto rounded-lg bg-white p-2 whitespace-pre-wrap">{{ pretty(l.old) }}</pre></div>
                     <div v-if="l.new"><p class="mb-1 font-semibold text-neutral-600">Sesudah</p><pre class="max-h-60 overflow-auto rounded-lg bg-white p-2 whitespace-pre-wrap">{{ pretty(l.new) }}</pre></div>
                 </div>

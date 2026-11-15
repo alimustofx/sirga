@@ -57,7 +57,7 @@ const editable = () => !!props.period && !props.locked;
 <template>
     <Head title="Potongan Sekolah" />
     <AppPageHeader title="Potongan Sekolah" subtitle="Pengaturan potongan sekolah per periode dan master jenis potongan." />
-    <AppTabs v-model="tab" class="mb-4" :tabs="[{ value: 'period', label: 'Potongan per Periode' }, { value: 'master', label: 'Master Jenis Potongan' }]" />
+    <AppTabs v-model="tab" class="mb-4" :tabs="[{ value: 'period', label: 'Per Periode' }, { value: 'master', label: 'Master Jenis' }]" />
 
     <template v-if="tab === 'period'">
         <div v-if="!period" class="rounded-xl border border-neutral-200 bg-white p-6 text-sm text-neutral-600">Belum ada periode.</div>
@@ -72,7 +72,7 @@ const editable = () => !!props.period && !props.locked;
             </div>
             <DeductionEditor :configs="configs" :rows="rows" :per-page="perPage" :config-totals="configTotals" :needs-reason="needsReason" :locked="locked" :editable="editable()">
                 <template #toolbar>
-                    <div class="grid gap-3 sm:grid-cols-[1fr_12rem]"><AppInput v-model="f.q" placeholder="Cari nama atau NIP ASN…" :icon="Search" inputmode="search" /><AppSelect v-model="f.status" placeholder="Semua status ASN" :options="[{ value: 'PNS', label: 'PNS' }, { value: 'PPPK', label: 'PPPK' }]" /></div>
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_12rem]"><AppInput v-model="f.q" placeholder="Cari nama atau NIP ASN…" :icon="Search" inputmode="search" /><AppSelect v-model="f.status" placeholder="Semua status ASN" :options="[{ value: 'PNS', label: 'PNS' }, { value: 'PPPK', label: 'PPPK' }]" /></div>
                 </template>
             </DeductionEditor>
         </template>

@@ -10,7 +10,7 @@ const points = [
 </script>
 
 <template>
-    <div class="grid min-h-dvh lg:grid-cols-[1.05fr_1fr]">
+    <div class="grid grid-cols-1 min-h-dvh lg:grid-cols-[1.05fr_1fr]">
         <aside class="bg-hero ledger-lines hidden flex-col justify-between p-12 text-white lg:flex">
             <BrandMark light />
             <div class="max-w-md">

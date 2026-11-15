@@ -10,7 +10,7 @@ defineProps<{ roles: { id: number; name: string; label: string; description: str
 <template>
     <Head title="Manajemen Role" />
     <AppPageHeader title="Manajemen Role" subtitle="Hak akses ditetapkan oleh sistem. Role pengguna diatur dari menu Data ASN." />
-    <div class="grid gap-3 sm:grid-cols-3">
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div v-for="r in roles" :key="r.id" class="rounded-xl border border-neutral-200 bg-white p-4 shadow-card"><p class="text-base font-bold text-primary-900">{{ r.label }}</p><p class="mt-1 text-[13px] text-neutral-600">{{ r.description }}</p><p class="num mt-3 text-sm font-semibold">{{ r.users_count }} pengguna</p></div>
     </div>
     <AppCard class="mt-4" title="Matriks Hak Akses" flush>

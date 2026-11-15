@@ -11,19 +11,20 @@ use Illuminate\Support\Facades\Route;
 
 // Login/logout disediakan Laravel Fortify (username = NIP).
 Route::get('sekolah/logo', [SchoolAssetController::class, 'logo'])->name('school.logo');
+Route::get('sekolah/favicon', [SchoolAssetController::class, 'favicon'])->middleware('throttle:60,1')->name('school.favicon');
 
 Route::middleware(['auth', 'account.ready'])->group(function () {
     Route::get('/', HomeController::class)->name('home');
 
     Route::get('ganti-password', [PasswordChangeController::class, 'show'])->name('password.change');
-    Route::put('ganti-password', [PasswordChangeController::class, 'update']);
+    Route::put('ganti-password', [PasswordChangeController::class, 'update'])->middleware('throttle:6,1');
 
     Route::post('notifikasi/baca-semua', [NotificationController::class, 'readAll']);
     Route::post('notifikasi/{notification}/baca', [NotificationController::class, 'read']);
 
     Route::get('profil', [ProfileController::class, 'show'])->name('profile');
-    Route::put('profil/email', [ProfileController::class, 'updateEmail']);
-    Route::put('profil/password', [ProfileController::class, 'updatePassword']);
+    Route::put('profil/email', [ProfileController::class, 'updateEmail'])->middleware('throttle:10,1');
+    Route::put('profil/password', [ProfileController::class, 'updatePassword'])->middleware('throttle:6,1');
 
     // ------------------------------------------------------------------ Guru ("Gaji Saya")
     Route::prefix('saya')->middleware('employee')->group(function () {

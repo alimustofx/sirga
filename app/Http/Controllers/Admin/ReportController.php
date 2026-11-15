@@ -10,6 +10,7 @@ use App\Support\Audit;
 use App\Support\Money;
 use App\Support\PayrollPresenter;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
@@ -22,17 +23,22 @@ class ReportController extends Controller
         $period = $periods->firstWhere('id', (int) $request->query('period')) ?? $periods->first();
         $records = $period ? $exports->records($period, $this->status($request), $this->payment($request)) : collect();
 
+        $per = in_array((int) $request->query('per_page'), [10, 15, 25, 50], true) ? (int) $request->query('per_page') : 15;
+        $pageNo = max(1, (int) $request->query('page', 1));
+        $paged = (new LengthAwarePaginator($records->forPage($pageNo, $per)->values(), $records->count(), $per, $pageNo, ['path' => $request->url(), 'query' => $request->query()]))
+            ->through(fn ($r) => [
+                'id' => $r->id, 'name' => $r->employee->full_name, 'nip' => $r->employee->nip, 'status' => $r->employee->employment_status->value,
+                'gross' => Money::str($r->gross_salary), 'net' => Money::str($r->net_salary), 'school' => Money::str($r->school_deductions_total), 'take_home' => Money::str($r->take_home_pay),
+                'payment_label' => ($r->payment?->status ?? PaymentStatus::Unpaid)->label(),
+            ]);
+
         return Inertia::render('admin/Reports', [
+            'perPage' => $per,
             'periods' => $periods->map(fn ($p) => PayrollPresenter::period($p))->values(),
             'period' => $period ? PayrollPresenter::period($period) : null,
             'filters' => ['status' => $request->query('status', ''), 'payment' => $request->query('payment', '')],
             'summary' => $exports->summary($records),
-            'rows' => $records->take(200)->map(fn ($r) => [
-                'id' => $r->id, 'name' => $r->employee->full_name, 'nip' => $r->employee->nip, 'status' => $r->employee->employment_status->value,
-                'gross' => Money::str($r->gross_salary), 'net' => Money::str($r->net_salary), 'school' => Money::str($r->school_deductions_total), 'take_home' => Money::str($r->take_home_pay),
-                'payment_label' => ($r->payment?->status ?? PaymentStatus::Unpaid)->label(),
-            ])->values(),
-            'truncated' => $records->count() > 200,
+            'rows' => $paged,
         ]);
     }
 

@@ -42,7 +42,7 @@ async function removeCfg(c: Cfg): Promise<void> {
 const amountOf = (r: Row, cid: number) => r.deductions.find((d) => d.config_id === cid)?.amount ?? '0';
 const grand = computed(() => Object.values(props.configTotals).reduce((a, b) => a + Number(b), 0));
 const chips = computed(() => props.configs.slice(0, 5));
-const th = 'sticky top-0 z-20 border-b border-neutral-200 bg-neutral-50 px-4 py-3 whitespace-nowrap';
+const th = 'sticky top-0 z-20 border-b border-neutral-200 bg-neutral-50 px-3 py-3 whitespace-nowrap';
 </script>
 
 <template>
@@ -58,7 +58,7 @@ const th = 'sticky top-0 z-20 border-b border-neutral-200 bg-neutral-50 px-4 py-
             </template>
             <p v-if="!configs.length" class="px-5 py-6 text-center text-sm text-neutral-600">Belum ada jenis potongan. Tambahkan potongan khusus atau salin dari periode sebelumnya.</p>
             <ul v-else class="divide-y divide-neutral-100">
-                <li v-for="c in configs" :key="c.id" class="grid items-center gap-x-4 gap-y-2 px-4 py-3 sm:px-5 md:grid-cols-[1fr_9rem_10rem_auto]">
+                <li v-for="c in configs" :key="c.id" class="grid grid-cols-1 items-center gap-x-4 gap-y-2 px-4 py-3 sm:px-5 md:grid-cols-[1fr_9rem_10rem_auto]">
                     <div class="min-w-0"><p class="truncate text-sm font-semibold text-neutral-950">{{ c.name }} <span v-if="c.is_special" class="ml-1 text-xs font-normal text-primary-600">khusus periode</span></p><p v-if="c.description" class="truncate text-xs text-neutral-600">{{ c.description }}</p></div>
                     <p class="num text-sm md:text-right"><span class="eyebrow mr-2 md:hidden">Default</span>{{ rupiah(c.default_amount) }}</p>
                     <p class="num text-sm md:text-right"><span class="eyebrow mr-2 md:block">Total periode</span>{{ rupiah(configTotals[c.id] ?? 0) }}</p>
@@ -76,14 +76,27 @@ const th = 'sticky top-0 z-20 border-b border-neutral-200 bg-neutral-50 px-4 py-
                 <div v-for="n in perPage > 10 ? 10 : perPage" :key="n" class="flex items-center gap-4 px-4 py-4"><div class="skeleton h-4 w-44 rounded" /><div v-for="m in Math.min(configs.length, 4)" :key="m" class="skeleton hidden h-4 w-20 rounded sm:block" /><div class="skeleton ml-auto h-4 w-24 rounded" /></div>
             </div>
             <AppEmptyState v-else-if="!rows.data.length" title="Tidak ada ASN pada tampilan ini" description="Ubah pencarian atau filter, atau impor/input penghasilan terlebih dahulu." />
-            <div v-else class="thin-scroll max-h-[68vh] overflow-auto">
+            <!-- ponsel: kartu per ASN (nominal langsung terlihat) -->
+            <ul v-else class="divide-y divide-neutral-100 md:hidden">
+                <li v-for="r in rows.data" :key="`m${r.id}`" class="space-y-3 px-4 py-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0"><p class="text-sm font-semibold text-primary-900 [overflow-wrap:anywhere]">{{ r.name }}</p><p class="num text-xs text-neutral-600">{{ formatNip(r.nip) }} · {{ r.status }}</p></div>
+                        <AppButton v-if="editable" size="sm" variant="outline" class="shrink-0" @click="openRow(r)">Ubah</AppButton>
+                    </div>
+                    <dl class="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-1.5 text-[13px]">
+                        <template v-for="c in configs" :key="c.id"><dt class="text-neutral-600">{{ c.name }}</dt><dd :class="['num text-right', Number(amountOf(r, c.id)) === 0 ? 'text-neutral-400' : 'text-neutral-950']">{{ rupiah(amountOf(r, c.id)) }}</dd></template>
+                    </dl>
+                    <div class="flex items-baseline justify-between border-t border-neutral-100 pt-2.5 text-sm"><span class="font-semibold text-primary-900">Total potongan</span><span class="num font-bold text-primary-900">{{ rupiah(r.total) }}</span></div>
+                </li>
+            </ul>
+            <div v-if="!navigating.table && rows.data.length" class="thin-scroll hidden max-h-[68vh] overflow-auto md:block">
                 <table class="min-w-full border-separate border-spacing-0 text-sm">
                     <thead>
                         <tr>
-                            <th :class="[th, 'left-0 z-30 min-w-[13rem] border-r text-left sm:min-w-[16rem]']"><span class="eyebrow">Nama ASN</span></th>
+                            <th :class="[th, 'left-0 z-30 min-w-[15rem] border-r text-left']"><span class="eyebrow">Nama ASN</span></th>
                             <th v-for="c in configs" :key="c.id" :class="[th, 'text-right']">
                                 <span class="inline-flex items-center justify-end gap-1.5"><span class="eyebrow">{{ c.name }}</span>
-                                    <button v-if="editable" type="button" class="flex size-6 items-center justify-center rounded-md text-neutral-400 hover:bg-neutral-200 hover:text-neutral-950" :title="`Terapkan nominal ${c.name} ke semua ASN`" :aria-label="`Terapkan nominal ${c.name}`" @click="openMass(c)"><SlidersHorizontal class="size-3.5" /></button></span>
+                                    <button v-if="editable" type="button" class="hidden size-7 items-center justify-center rounded-md text-neutral-400 hover:bg-neutral-200 hover:text-neutral-950 sm:flex" :title="`Terapkan nominal ${c.name} ke semua ASN`" :aria-label="`Terapkan nominal ${c.name}`" @click="openMass(c)"><SlidersHorizontal class="size-3.5" /></button></span>
                             </th>
                             <th :class="[th, 'text-right']"><span class="eyebrow">Total</span></th>
                             <th :class="[th, 'text-right']"><span class="eyebrow">Diterimakan</span></th>
@@ -96,8 +109,8 @@ const th = 'sticky top-0 z-20 border-b border-neutral-200 bg-neutral-50 px-4 py-
                                 <p class="truncate text-sm font-semibold text-primary-900">{{ r.name }}</p>
                                 <p class="num text-xs text-neutral-600">{{ formatNip(r.nip) }} · {{ r.status }}</p>
                             </td>
-                            <td v-for="c in configs" :key="c.id" :class="['num border-b border-neutral-100 px-4 py-3 text-right group-hover:bg-neutral-50', Number(amountOf(r, c.id)) === 0 ? 'text-neutral-400' : 'text-neutral-950']">{{ rupiah(amountOf(r, c.id)) }}</td>
-                            <td class="num border-b border-neutral-100 px-4 py-3 text-right font-semibold group-hover:bg-neutral-50">{{ rupiah(r.total) }}</td>
+                            <td v-for="c in configs" :key="c.id" :class="['num border-b border-neutral-100 px-3 py-3 text-right group-hover:bg-neutral-50', Number(amountOf(r, c.id)) === 0 ? 'text-neutral-400' : 'text-neutral-950']">{{ rupiah(amountOf(r, c.id)) }}</td>
+                            <td class="num border-b border-neutral-100 px-3 py-3 text-right font-semibold group-hover:bg-neutral-50">{{ rupiah(r.total) }}</td>
                             <td class="num border-b border-neutral-100 px-4 py-3 text-right text-primary-900 group-hover:bg-neutral-50">{{ rupiah(r.take_home) }}</td>
                             <td v-if="editable" class="sticky right-0 z-10 border-b border-l border-neutral-100 bg-white px-3 py-2 group-hover:bg-neutral-50"><AppButton size="sm" variant="outline" @click="openRow(r)">Ubah</AppButton></td>
                         </tr>

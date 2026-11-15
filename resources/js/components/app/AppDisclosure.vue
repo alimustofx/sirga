@@ -14,7 +14,7 @@ watch(open, (v) => { if (props.storageKey) { try { localStorage.setItem(`sirga.$
 </script>
 
 <template>
-    <section class="rounded-xl border border-neutral-200 bg-white">
+    <section class="min-w-0 rounded-xl border border-neutral-200 bg-white">
         <button type="button" class="flex min-h-14 w-full items-center gap-3 px-4 py-3 text-left sm:px-5" :aria-expanded="open" @click="open = !open">
             <span class="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-4">
                 <span class="flex items-center gap-2 text-[15px] font-semibold text-primary-900">{{ title }}<span v-if="count !== undefined" class="num rounded-md bg-neutral-100 px-1.5 py-0.5 text-[11px] font-semibold text-neutral-600">{{ count }}</span></span>

@@ -8,14 +8,15 @@ import AppSelect from '@/components/app/AppSelect.vue';
 import AppTable from '@/components/app/AppTable.vue';
 import { useFilters } from '@/composables/useFilters';
 import { formatNip, rupiah } from '@/lib/format';
-import type { Period } from '@/types';
+import AppPagination from '@/components/app/AppPagination.vue';
+import type { Paginated, Period } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 const props = defineProps<{
     periods: Period[]; period: Period | null; filters: { status: string; payment: string };
     summary: { count: number; gross: string; official: string; net: string; school: string; take_home: string; paid: number; pending: number };
-    rows: { id: number; name: string; nip: string; status: string; gross: string; net: string; school: string; take_home: string; payment_label: string }[]; truncated: boolean;
+    rows: Paginated<{ id: number; name: string; nip: string; status: string; gross: string; net: string; school: string; take_home: string; payment_label: string }>; perPage: number;
 }>();
 const f = useFilters('/admin/laporan', props.filters, () => ({ period: props.period?.id }));
 const qs = computed(() => new URLSearchParams({ period: String(props.period?.id ?? ''), ...(f.status ? { status: f.status } : {}), ...(f.payment ? { payment: f.payment } : {}) }).toString());
@@ -27,7 +28,7 @@ const columns = [{ key: 'name', label: 'Nama', primary: true }, { key: 'status',
     <AppPageHeader title="Laporan & Export" subtitle="Ringkasan periode dan unduhan Excel."><PeriodFilter v-if="period" :periods="periods" :current="period.id" path="/admin/laporan" /></AppPageHeader>
     <AppCard v-if="!period"><p class="text-sm text-neutral-600">Belum ada periode.</p></AppCard>
     <template v-else>
-        <div class="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <AppSelect v-model="f.status" placeholder="Semua status ASN" :options="[{ value: 'PNS', label: 'PNS' }, { value: 'PPPK', label: 'PPPK' }]" />
             <AppSelect v-model="f.payment" placeholder="Semua status bayar" :options="[{ value: 'belum_dibayar', label: 'Belum Dibayar' }, { value: 'menunggu_verifikasi', label: 'Menunggu Verifikasi' }, { value: 'lunas', label: 'Lunas' }, { value: 'ditolak', label: 'Ditolak' }]" />
         </div>
@@ -43,11 +44,11 @@ const columns = [{ key: 'name', label: 'Nama', primary: true }, { key: 'status',
             <AppButton external variant="outline" :href="`/admin/laporan/export?type=payments&${qs}`">Status pembayaran</AppButton>
         </div>
         <AppCard flush>
-            <AppTable :columns="columns" :rows="rows" empty-title="Tidak ada data" empty-text="Ubah filter atau periksa data periode.">
+            <AppTable :columns="columns" :rows="rows.data" empty-title="Tidak ada data" empty-text="Ubah filter atau periksa data periode.">
                 <template #cell-name="{ row }"><span class="font-semibold text-primary-900">{{ row.name }}</span><span class="num block text-xs text-neutral-600">{{ formatNip(row.nip) }}</span></template>
                 <template v-for="k in ['gross', 'net', 'school', 'take_home']" :key="k" #[`cell-${k}`]="{ row }">{{ rupiah(row[k]) }}</template>
             </AppTable>
-            <p v-if="truncated" class="border-t border-neutral-200 px-4 py-2 text-[13px] text-neutral-600">Pratinjau dibatasi 200 baris. Unduh Excel untuk data lengkap.</p>
+            <AppPagination :page="rows" :per-page="perPage" :per-page-options="[10, 15, 25, 50]" />
         </AppCard>
     </template>
 </template>

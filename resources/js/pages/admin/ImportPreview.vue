@@ -50,7 +50,7 @@ async function cancel(): Promise<void> {
 
     <div v-for="n in notices" :key="n.message" class="mb-3 rounded-xl border border-[#fcd34d] bg-warning-bg p-3 text-sm text-warning-fg">{{ n.message }}</div>
 
-    <div class="grid grid-cols-2 gap-3 lg:grid-cols-5">
+    <div class="grid grid-cols-2 gap-3 xl:grid-cols-5">
         <StatCard label="Total baris" :value="batch.total" />
         <StatCard label="Valid" :value="batch.valid" />
         <StatCard label="Bermasalah" :value="batch.invalid" :tone="batch.invalid ? 'danger' : 'default'" />
