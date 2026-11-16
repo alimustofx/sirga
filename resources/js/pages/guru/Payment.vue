@@ -40,7 +40,7 @@ defineProps<{ periods: Period[]; period: Period | null; payment: PaymentInfo | n
 
         <div class="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
             <BankAccountCard :account="payment.account" />
-            <TransferInstructionCard :total="payment.total" :note="payment.transfer_note" />
+            <TransferInstructionCard :total="payment.total" :note="payment.transfer_note" :note-max="payment.transfer_note_max" />
         </div>
 
         <PaymentUpload v-if="payment.can_upload && period" :period-id="period.id" :max-kb="maxKb" :retry="payment.status === 'ditolak'" />

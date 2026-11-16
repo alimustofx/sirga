@@ -1,47 +1,26 @@
-# SIRGA ASN — Update v4 (final polish)
+# SIRGA ASN — Update v5: berita transfer singkat
 
-Paket ini berisi file yang berubah: `app/`, `routes/`, `resources/`, `scripts/`, dan 1 tes baru.
-Tidak menyentuh `.env`, `vendor/`, `node_modules/`, database/migrasi, `config/`, atau `bootstrap/`.
-**Tidak perlu `php artisan migrate`.**
+Hanya 10 file berubah. **Tidak perlu migrasi.** Data pembayaran lama tidak terpengaruh
+(berita transfer dihitung otomatis saat ditampilkan, tidak disimpan).
 
 ## Pasang di Mac — satu baris
 
 ```bash
-unzip -p ~/Downloads/sirga-ui-v4.zip sirga/scripts/sirga-update.sh | bash -s -- ~/Downloads/sirga-ui-v4.zip /Applications/MAMP/htdocs/sirga
+unzip -p ~/Downloads/sirga-ui-v5.zip sirga/scripts/sirga-update.sh | bash -s -- ~/Downloads/sirga-ui-v5.zip /Applications/MAMP/htdocs/sirga
 ```
 
-Skrip: ① backup ke Desktop → ② ekstrak ke folder sementara → ③ `rsync` (hanya menimpa, tidak menghapus) →
-④ `sirga-doctor.sh` (memeriksa & memulihkan file starter yang hilang) → ⑤ `npm run build` + `php artisan optimize:clear`.
+(backup otomatis ke Desktop → rsync tanpa menghapus → sirga-doctor → build). Lalu muat ulang browser: **⌘ + Shift + R**.
 
-> ⚠️ Jangan drag-and-drop folder lewat Finder lalu "Ganti" — Finder menghapus isi folder lama.
+## Format berita transfer baru
 
-### Manual (jika mau)
-```bash
-cd /Applications/MAMP/htdocs/sirga
-rm -rf /tmp/sirga-ui && mkdir -p /tmp/sirga-ui && unzip -oq ~/Downloads/sirga-ui-v4.zip -d /tmp/sirga-ui
-rsync -av /tmp/sirga-ui/sirga/ ./
-bash scripts/sirga-doctor.sh && npm run build && php artisan optimize:clear
-```
+`POT <NAMA> <BLNTH>` — maksimal **18 karakter**, hanya huruf/angka/spasi.
 
-### Kembali ke versi sebelumnya
-```bash
-tar -xzf ~/Desktop/sirga-backup-XXXXXXXX-XXXXXX.tar.gz -C /Applications/MAMP/htdocs/sirga && npm run build
-```
+| Nama di sistem | Berita transfer |
+|---|---|
+| Dra. Fiva Tri Wahyuni, M.Pd. | `POT FIVA NOV26` |
+| Drs. Muhammad Abdurrahman Al-Faruqi, M.M. | `POT ABDURRAH NOV26` |
+| Hj. Siti Nurhaliza Kusumawardhani, S.Pd., M.Si. | `POT SITI NOV26` |
 
-Setelah selesai, muat ulang browser dengan **⌘ + Shift + R** (di ponsel: tutup tab lalu buka lagi).
-
-## Favicon dari logo sekolah
-Unggah logo di **Pengaturan › Identitas Sekolah**. Logo otomatis menjadi ikon tab browser (64×64) dan ikon layar utama
-ponsel (180×180, latar putih). Belum ada logo → memakai ikon bawaan. Perlu ekstensi PHP **GD** (sudah dibutuhkan paket Excel).
-
-## Yang berubah
-- **Halaman admin lain** dirapikan dengan gaya "Ledger": paginasi di **semua** daftar besar (Data ASN, Penghasilan, Potongan,
-  Pembayaran, Laporan, Audit, Pengumuman, Komponen, Periode, pratinjau impor, Riwayat guru).
-- **Perbaikan meluap**: legenda penagihan, angka rupiah yang patah di tengah, nama file panjang, kartu statistik sempit di layar
-  1024px, header guru di tablet, grid yang tidak bisa menyusut.
-- **Ponsel**: font dasar 16px (sebelumnya terhitung 14px sehingga teks kecil), input 16px → **tidak ada auto-zoom iOS**,
-  `viewport-fit=cover` + safe-area, target sentuh ≥ 40px, matriks potongan menjadi **kartu per ASN**, navigasi bawah sampai
-  lebar 1024px, teks unggah "Ketuk untuk memilih foto".
-- **Keamanan**: batas percobaan ganti password/email, header HSTS & `no-store` untuk halaman login, waktu proses login yang
-  seragam (NIP tak bisa ditebak lewat selisih waktu), tipe komponen mengikuti master (bukan input klien), peringatan
-  konfigurasi produksi di `sirga-doctor.sh`.
+Aturan: gelar dibuang; awalan umum (Muhammad, Ni, Luh, Putu…) dilewati bila ada nama berikutnya; nama dipotong
+agar total ≤ 18 karakter. Tampil di halaman Pembayaran guru (besar + tombol salin + penghitung karakter), halaman
+verifikasi admin, dan slip gaji PDF. Aturan ada di satu tempat: `app/Support/TransferNote.php`.

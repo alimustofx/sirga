@@ -70,7 +70,8 @@ final class PayrollPresenter
                 'bank' => $account->bank_name, 'number' => $account->account_number, 'holder' => $account->account_holder,
                 'instruction' => $account->payment_instruction,
             ] : null,
-            'transfer_note' => 'Potongan gaji milik '.$r->employee->full_name.' bulan '.$period->label.'.',
+            'transfer_note' => TransferNote::compose($r->employee->full_name, $period->period_month, $period->period_year),
+            'transfer_note_max' => TransferNote::MAX,
             'can_upload' => $period->status === PeriodStatus::Published && $payable && in_array($status, [PaymentStatus::Unpaid, PaymentStatus::Rejected], true),
             'closed' => $period->status === PeriodStatus::Closed,
         ];

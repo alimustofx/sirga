@@ -32,6 +32,7 @@ class PayslipService
             'official' => $record->items->filter(fn ($i) => $i->component_type === ComponentType::OfficialDeduction && $show($i)),
             'deductions' => $record->deductions->filter(fn ($d) => $setting->show_zero_deductions || $show($d)),
             'setting' => $setting, 'account' => PaymentAccount::current(),
+            'transferNote' => \App\Support\TransferNote::compose($record->employee->full_name, $record->period->period_month, $record->period->period_year),
             'docNumber' => $this->documentNumber($record), 'printedAt' => now()->timezone(config('sirga.timezone')),
             'logo' => $this->image($setting->school_logo), 'qr' => $this->image($setting->treasurer_signature_qr),
         ];

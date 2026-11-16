@@ -87,6 +87,7 @@ export type PaymentInfo = {
     proofs: Proof[];
     account: { bank: string; number: string; holder: string; instruction: string | null } | null;
     transfer_note: string;
+    transfer_note_max: number;
     can_upload: boolean;
     closed: boolean;
 };

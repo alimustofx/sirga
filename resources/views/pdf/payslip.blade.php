@@ -96,7 +96,8 @@
                 @if ($account && (float) $record->school_deductions_total > 0)
                     <strong>Pembayaran potongan sekolah</strong><br>
                     Transfer {{ $rp($record->school_deductions_total) }} ke {{ $account->bank_name }}<br>
-                    No. Rek. {{ $account->account_number }} a.n. {{ $account->account_holder }}
+                    No. Rek. {{ $account->account_number }} a.n. {{ $account->account_holder }}<br>
+                    Berita transfer: <strong>{{ $transferNote }}</strong>
                 @endif
             </td>
             <td style="text-align:center">
